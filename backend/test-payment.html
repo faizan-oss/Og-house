@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Integration Test - The Og House</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+        }
+        .success { border-left-color: #28a745; background: #d4edda; }
+        .error { border-left-color: #dc3545; background: #f8d7da; }
+        .info { border-left-color: #17a2b8; background: #d1ecf1; }
+        .payment-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .status-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #ddd;
+        }
+        .status-card.paid { border-color: #28a745; background: #d4edda; }
+        .status-card.pending { border-color: #ffc107; background: #fff3cd; }
+        .status-card.failed { border-color: #dc3545; background: #f8d7da; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💳 Payment Integration Test</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">
+            Test the complete payment flow from cart to payment completion
+        </p>
+
+        <!-- Test Order Creation -->
+        <div class="form-group">
+            <h3>🛒 Create Test Order</h3>
+            <label for="customerName">Customer Name:</label>
+            <input type="text" id="customerName" value="Test Customer" required>
+            
+            <label for="deliveryAddress">Delivery Address:</label>
+            <textarea id="deliveryAddress" rows="3" placeholder="Enter delivery address">123 Test Street, Test City</textarea>
+            
+            <label for="specialInstructions">Special Instructions:</label>
+            <textarea id="specialInstructions" rows="2" placeholder="Any special instructions">Extra cheese please!</textarea>
+            
+            <button class="btn" onclick="createTestOrder()">Create Test Order</button>
+        </div>
+
+        <!-- Payment Status -->
+        <div id="paymentStatus" class="payment-status" style="display: none;">
+            <div class="status-card pending">
+                <h4>Order Status</h4>
+                <p id="orderStatus">Pending</p>
+            </div>
+            <div class="status-card pending">
+                <h4>Payment Status</h4>
+                <p id="paymentStatusText">Pending</p>
+            </div>
+            <div class="status-card">
+                <h4>Total Amount</h4>
+                <p id="totalAmount">₹0</p>
+            </div>
+        </div>
+
+        <!-- Payment Button -->
+        <div id="paymentSection" style="display: none;">
+            <h3>💳 Process Payment</h3>
+            <button class="btn" onclick="processPayment()">Pay Now with Razorpay</button>
+        </div>
+
+        <!-- Results -->
+        <div id="result" class="result" style="display: none;"></div>
+
+        <!-- Test Controls -->
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #eee;">
+            <h3>🧪 Test Controls</h3>
+            <button class="btn" onclick="testPaymentStatus()" style="margin-bottom: 10px;">Check Payment Status</button>
+            <button class="btn" onclick="testRefund()" style="background: linear-gradient(45deg, #dc3545, #c82333);">Test Refund (Admin)</button>
+        </div>
+    </div>
+
+    <script>
+        let currentOrder = null;
+        let currentPaymentOrder = null;
+
+        // Create test order
+        async function createTestOrder() {
+            try {
+                const orderData = {
+                    customerName: document.getElementById('customerName').value,
+                    deliveryAddress: document.getElementById('deliveryAddress').value,
+                    specialInstructions: document.getElementById('specialInstructions').value,
+                    orderType: 'Delivery'
+                };
+
+                const response = await fetch('http://localhost:5000/api/payments/from-cart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer YOUR_JWT_TOKEN_HERE' // Replace with actual token
+                    },
+                    body: JSON.stringify(orderData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    currentOrder = result.order;
+                    currentPaymentOrder = result.paymentOrder;
+                    
+                    showResult('✅ Order created successfully!', 'success');
+                    showPaymentStatus();
+                    showPaymentSection();
+                    
+                    // Update status cards
+                    document.getElementById('orderStatus').textContent = 'Pending';
+                    document.getElementById('paymentStatusText').textContent = 'Pending';
+                    document.getElementById('totalAmount').textContent = `₹${result.order.totalAmount}`;
+                } else {
+                    showResult(`❌ Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Process payment with Razorpay
+        function processPayment() {
+            if (!currentPaymentOrder) {
+                showResult('❌ No payment order available', 'error');
+                return;
+            }
+
+            const options = {
+                key: 'YOUR_RAZORPAY_KEY_ID', // Replace with actual key
+                amount: currentPaymentOrder.amount,
+                currency: currentPaymentOrder.currency,
+                name: 'The Og House',
+                description: `Payment for Order #${currentOrder.id}`,
+                order_id: currentPaymentOrder.razorpayOrderId,
+                handler: function (response) {
+                    verifyPayment(response);
+                },
+                prefill: {
+                    name: currentOrder.customerName,
+                    email: 'test@example.com',
+                    contact: '9999999999'
+                },
+                notes: {
+                    orderId: currentOrder.id
+                },
+                theme: {
+                    color: '#667eea'
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+        }
+
+        // Verify payment after completion
+        async function verifyPayment(response) {
+            try {
+                const verificationData = {
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature,
+                    orderId: currentOrder.id
+                };
+
+                const verifyResponse = await fetch('http://localhost:5000/api/payments/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer YOUR_JWT_TOKEN_HERE' // Replace with actual token
+                    },
+                    body: JSON.stringify(verificationData)
+                });
+
+                const result = await verifyResponse.json();
+
+                if (result.success) {
+                    showResult('✅ Payment verified successfully!', 'success');
+                    updatePaymentStatus('Paid');
+                } else {
+                    showResult(`❌ Payment verification failed: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Error verifying payment: ${error.message}`, 'error');
+            }
+        }
+
+        // Check payment status
+        async function testPaymentStatus() {
+            if (!currentOrder) {
+                showResult('❌ No order available', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/payments/status/${currentOrder.id}`, {
+                    headers: {
+                        'Authorization': 'Bearer YOUR_JWT_TOKEN_HERE' // Replace with actual token
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showResult(`📊 Payment Status: ${result.paymentStatus}`, 'info');
+                    updatePaymentStatus(result.paymentStatus);
+                } else {
+                    showResult(`❌ Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Test refund (Admin only)
+        async function testRefund() {
+            if (!currentOrder) {
+                showResult('❌ No order available', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/payments/refund/${currentOrder.id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer YOUR_ADMIN_JWT_TOKEN_HERE' // Replace with admin token
+                    },
+                    body: JSON.stringify({
+                        amount: currentOrder.totalAmount,
+                        reason: 'Test refund'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showResult('✅ Refund processed successfully!', 'success');
+                    updatePaymentStatus('Refunded');
+                } else {
+                    showResult(`❌ Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Helper functions
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = message;
+            resultDiv.className = `result ${type}`;
+            resultDiv.style.display = 'block';
+        }
+
+        function showPaymentStatus() {
+            document.getElementById('paymentStatus').style.display = 'grid';
+        }
+
+        function showPaymentSection() {
+            document.getElementById('paymentSection').style.display = 'block';
+        }
+
+        function updatePaymentStatus(status) {
+            const statusCard = document.querySelector('.status-card:nth-child(2)');
+            const statusText = document.getElementById('paymentStatusText');
+            
+            statusText.textContent = status;
+            statusCard.className = `status-card ${status.toLowerCase()}`;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Payment test page loaded');
+            console.log('📝 Instructions:');
+            console.log('1. Create a test order');
+            console.log('2. Process payment with Razorpay');
+            console.log('3. Verify payment status');
+            console.log('4. Test refund functionality');
+        });
+    </script>
+</body>
+</html>

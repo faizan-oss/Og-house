@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Og House - Notification Test</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .panel {
+            flex: 1;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .admin-panel {
+            background-color: #f0f8ff;
+        }
+        .user-panel {
+            background-color: #fff8f0;
+        }
+        .notification {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .notification.error {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+        .notification.info {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+        button {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        input, select {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-accepted { background: #d1ecf1; color: #0c5460; }
+        .status-ontheway { background: #d4edda; color: #155724; }
+        .status-completed { background: #c3e6cb; color: #155724; }
+        .status-cancelled { background: #f5c6cb; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>🍔 Og House - Real-time Notification Test</h1>
+    
+    <div class="container">
+        <div class="panel admin-panel">
+            <h2>👨‍💼 Admin Panel</h2>
+            <button onclick="joinAdmin()">Join as Admin</button>
+            <button onclick="simulateNewOrder()">Simulate New Order</button>
+            <div id="adminNotifications"></div>
+        </div>
+        
+        <div class="panel user-panel">
+            <h2>👤 User Panel</h2>
+            <input type="text" id="userId" placeholder="Enter User ID" value="user123">
+            <button onclick="joinUser()">Join as User</button>
+            <button onclick="simulateStatusUpdate()">Simulate Status Update</button>
+            <div id="userNotifications"></div>
+        </div>
+    </div>
+
+    <div class="panel" style="margin-top: 20px;">
+        <h2>📝 Test Order Creation</h2>
+        <form id="orderForm">
+            <input type="text" id="customerName" placeholder="Customer Name" value="John Doe" required>
+            <input type="text" id="userId" placeholder="User ID (optional)" value="user123">
+            <select id="status">
+                <option value="Pending">Pending</option>
+                <option value="Accepted">Accepted</option>
+                <option value="On The Way">On The Way</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+            </select>
+            <button type="submit">Create Test Order</button>
+        </form>
+    </div>
+
+    <script>
+        const socket = io('http://localhost:5000');
+        
+        // Admin notifications
+        function joinAdmin() {
+            socket.emit('join-admin');
+            addNotification('adminNotifications', 'Joined admin room', 'info');
+        }
+        
+        function simulateNewOrder() {
+            const order = {
+                id: 'order_' + Date.now(),
+                customerName: 'Test Customer',
+                totalAmount: 299,
+                status: 'Pending',
+                createdAt: new Date(),
+                items: [{ food: { name: 'Burger' }, quantity: 2 }]
+            };
+            addNotification('adminNotifications', `New order from ${order.customerName} - ₹${order.totalAmount}`, 'success');
+        }
+        
+        // User notifications
+        function joinUser() {
+            const userId = document.getElementById('userId').value;
+            socket.emit('join-user', userId);
+            addNotification('userNotifications', `Joined as user: ${userId}`, 'info');
+        }
+        
+        function simulateStatusUpdate() {
+            const statuses = ['Accepted', 'On The Way', 'Completed'];
+            const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+            addNotification('userNotifications', `Order status updated to: ${randomStatus}`, 'success');
+        }
+        
+        // Socket event listeners
+        socket.on('new-order', (data) => {
+            addNotification('adminNotifications', `🔔 ${data.message}`, 'success');
+        });
+        
+        socket.on('order-status-update', (data) => {
+            addNotification('userNotifications', `📋 ${data.message}`, 'success');
+        });
+        
+        // Helper functions
+        function addNotification(containerId, message, type = 'success') {
+            const container = document.getElementById(containerId);
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <strong>${new Date().toLocaleTimeString()}</strong><br>
+                ${message}
+            `;
+            container.appendChild(notification);
+            
+            // Auto-remove after 10 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 10000);
+        }
+        
+        // Form submission
+        document.getElementById('orderForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                customerName: document.getElementById('customerName').value,
+                userId: document.getElementById('userId').value || undefined,
+                status: document.getElementById('status').value,
+                items: [
+                    { food: '507f1f77bcf86cd799439011', quantity: 2 }
+                ]
+            };
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    const order = await response.json();
+                    addNotification('adminNotifications', `Order created: ${order._id}`, 'success');
+                } else {
+                    addNotification('adminNotifications', 'Failed to create order', 'error');
+                }
+            } catch (error) {
+                addNotification('adminNotifications', 'Error: ' + error.message, 'error');
+            }
+        });
+        
+        // Connection status
+        socket.on('connect', () => {
+            console.log('Connected to server');
+            addNotification('adminNotifications', 'Connected to notification server', 'info');
+        });
+        
+        socket.on('disconnect', () => {
+            console.log('Disconnected from server');
+            addNotification('adminNotifications', 'Disconnected from server', 'error');
+        });
+    </script>
+</body>
+</html>
