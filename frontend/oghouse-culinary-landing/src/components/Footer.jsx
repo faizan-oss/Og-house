@@ -33,7 +33,7 @@ const Footer = () => {
             <img 
               src="/lovable-uploads/6c5b80cf-9d75-46fb-a308-4f9f0704f8bf.png" 
               alt="The OG House Logo" 
-              className="h-12 w-auto brightness-0 invert"
+              className="h-20 w-20  "
             />
             <p className="text-background/80 leading-relaxed">
               Refined American fare delivered with passion. Experience exceptional flavors 
@@ -82,15 +82,15 @@ const Footer = () => {
             <div className="space-y-4 text-background/80">
               <div className="flex items-center space-x-3">
                 <Phone className="h-4 w-4" />
-                <span>(555) 123-4567</span>
+                <span>+91-7070893997</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Mail className="h-4 w-4" />
-                <span>hello@oghouse.com</span>
+                <span>Theoghouze@gmail.com</span>
               </div>
               <div className="flex items-start space-x-3">
                 <MapPin className="h-4 w-4 mt-1" />
-                <span>123 Culinary Street<br />Foodie District, FD 12345</span>
+                <span>8, Ak apartment, dhatkidih, Jamshedpur 831001<br />Foodie District, FD 12345</span>
               </div>
             </div>
           </div>

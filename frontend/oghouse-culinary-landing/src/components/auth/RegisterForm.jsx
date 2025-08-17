@@ -4,7 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth.jsx';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 const RegisterForm = ({ onSwitchToLogin, onSuccess }) => {
   const [name, setName] = useState('');
@@ -21,18 +22,21 @@ const RegisterForm = ({ onSwitchToLogin, onSuccess }) => {
     e.preventDefault();
     
     if (password !== confirmPassword) {
+      toast.error("Passwords don't match");
       return;
     }
     
     setIsLoading(true);
     
-    const success = await register(name, email, password);
-    
-    if (success && onSuccess) {
-      onSuccess();
+    try {
+      const success = await register(name, email, password);
+      if (success) {
+        toast.success('Registration successful!');
+        onSwitchToLogin();
+      }
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   return (
@@ -94,8 +98,8 @@ const RegisterForm = ({ onSwitchToLogin, onSuccess }) => {
               <Button
                 type="button"
                 variant="ghost"
-                size="default"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 rounded-full flex items-center justify-center"
+                size="sm"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 rounded-full"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
@@ -119,8 +123,8 @@ const RegisterForm = ({ onSwitchToLogin, onSuccess }) => {
               <Button
                 type="button"
                 variant="ghost"
-                size="default"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 rounded-full flex items-center justify-center"
+                size="sm"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 rounded-full"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               >
                 {showConfirmPassword ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
@@ -133,26 +137,25 @@ const RegisterForm = ({ onSwitchToLogin, onSuccess }) => {
           
           <Button 
             type="submit" 
-            className="w-full py-3 text-sm rounded-full flex items-center justify-center" 
+            className="w-full py-3 text-sm rounded-full" 
             disabled={isLoading || (password !== confirmPassword && confirmPassword !== '')}
-            size="default"
           >
             {isLoading ? 'Creating Account...' : 'Create Account'}
           </Button>
+          
+          <div className="mt-6 text-center">
+            <p className="text-sm text-muted-foreground">
+              Already have an account?{' '}
+              <Button
+                variant="link"
+                className="p-0 h-auto font-semibold text-primary"
+                onClick={onSwitchToLogin}
+              >
+                Sign in here
+              </Button>
+            </p>
+          </div>
         </form>
-        
-        <div className="mt-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            Already have an account?{' '}
-            <Button
-              variant="link"
-              className="p-0 h-auto font-semibold text-primary"
-              onClick={onSwitchToLogin}
-            >
-              Sign in here
-            </Button>
-          </p>
-        </div>
       </CardContent>
     </Card>
   );

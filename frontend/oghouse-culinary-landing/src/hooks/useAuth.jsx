@@ -1,62 +1,68 @@
 import { useState, useEffect, createContext, useContext } from 'react';
-import { authAPI } from '@/lib/api.js';
+import { authAPI } from '@/lib/api';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext(undefined);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Check for stored user on mount
-    const storedUser = localStorage.getItem('user');
-    const token = localStorage.getItem('authToken');
-    
-    if (storedUser && token) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        localStorage.removeItem('user');
-        localStorage.removeItem('authToken');
+    const initializeAuth = async () => {
+      const token = localStorage.getItem('authToken');
+      const userData = localStorage.getItem('user');
+      
+      if (token && userData) {
+        try {
+          setUser(JSON.parse(userData));
+        } catch (error) {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('user');
+        }
       }
-    }
-    setIsLoading(false);
+      setIsLoading(false);
+    };
+
+    initializeAuth();
   }, []);
 
   const login = async (email, password) => {
     try {
+      setIsLoading(true);
       const response = await authAPI.login({ email, password });
       
-      if (response.token && response.user) {
-        localStorage.setItem('authToken', response.token);
-        localStorage.setItem('user', JSON.stringify(response.user));
-        setUser(response.user);
-        toast.success('Welcome back!');
-        return true;
-      }
-      return false;
+      localStorage.setItem('authToken', response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
+      setUser(response.user);
+      toast.success('Welcome back!');
+      navigate('/');
+      return true;
     } catch (error) {
       toast.error(error.response?.data?.message || 'Login failed');
       return false;
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const register = async (name, email, password) => {
     try {
+      setIsLoading(true);
       const response = await authAPI.register({ name, email, password });
       
-      if (response.token && response.user) {
-        localStorage.setItem('authToken', response.token);
-        localStorage.setItem('user', JSON.stringify(response.user));
-        setUser(response.user);
-        toast.success('Account created successfully!');
-        return true;
-      }
-      return false;
+      localStorage.setItem('authToken', response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
+      setUser(response.user);
+      toast.success('Account created successfully!');
+      return true;
     } catch (error) {
       toast.error(error.response?.data?.message || 'Registration failed');
       return false;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -65,6 +71,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
     setUser(null);
     toast.success('Logged out successfully');
+    navigate('/');
   };
 
   const value = {

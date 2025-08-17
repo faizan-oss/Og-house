@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { validateAuthResponse } from './apiValidator';
 
 const API_BASE_URL = 'https://og-house.onrender.com/api';
 

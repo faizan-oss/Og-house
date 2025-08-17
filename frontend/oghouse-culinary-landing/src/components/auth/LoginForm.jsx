@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth.jsx';
+import { useAuth } from '@/hooks/useAuth';
 
 const LoginForm = ({ onSwitchToRegister, onSuccess }) => {
   const [email, setEmail] = useState('');
@@ -18,13 +18,14 @@ const LoginForm = ({ onSwitchToRegister, onSuccess }) => {
     e.preventDefault();
     setIsLoading(true);
     
-    const success = await login(email, password);
-    
-    if (success && onSuccess) {
-      onSuccess();
+    try {
+      const success = await login(email, password);
+      if (success && onSuccess) {
+        onSuccess();
+      }
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   return (
@@ -69,8 +70,8 @@ const LoginForm = ({ onSwitchToRegister, onSuccess }) => {
               <Button
                 type="button"
                 variant="ghost"
-                size="default"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 rounded-full flex items-center justify-center"
+                size="sm"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 rounded-full"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
@@ -78,23 +79,27 @@ const LoginForm = ({ onSwitchToRegister, onSuccess }) => {
             </div>
           </div>
           
-          <Button type="submit" className="w-full py-3 text-sm rounded-full flex items-center justify-center" disabled={isLoading} size="default">
+          <Button 
+            type="submit" 
+            className="w-full py-3 text-sm rounded-full"
+            disabled={isLoading}
+          >
             {isLoading ? 'Signing In...' : 'Sign In'}
           </Button>
+          
+          <div className="mt-6 text-center">
+            <p className="text-sm text-muted-foreground">
+              Don't have an account?{' '}
+              <Button
+                variant="link"
+                className="p-0 h-auto font-semibold text-primary"
+                onClick={onSwitchToRegister}
+              >
+                Sign up now
+              </Button>
+            </p>
+          </div>
         </form>
-        
-        <div className="mt-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            Don't have an account?{' '}
-            <Button
-              variant="link"
-              className="p-0 h-auto font-semibold text-primary"
-              onClick={onSwitchToRegister}
-            >
-              Sign up now
-            </Button>
-          </p>
-        </div>
       </CardContent>
     </Card>
   );

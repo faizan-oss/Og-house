@@ -57,14 +57,10 @@ const Hero = () => {
           <div className="relative lg:order-2">
             <div className="relative bg-card rounded-3xl shadow-elegant p-8 animate-fade-in">
               <img 
-                src="https://res.cloudinary.com/dfpedvv8x/image/upload/v1755250181/food_items/eka1zvendr09hc5jhla8.png"
+                src="https://res.cloudinary.com/dfpedvv8x/image/upload/v1755247965/food_items/xeqtzhqlgjvqt2uwzgys.png"
                 alt="Gourmet burger and fries"
                 className="w-full h-[400px] lg:h-[500px] object-cover rounded-2xl"
               />
-              <div className="absolute -bottom-4 -right-4 bg-accent text-accent-foreground p-4 rounded-2xl shadow-elegant">
-                <p className="font-bold text-lg">4.9★</p>
-                <p className="text-sm">2,500+ Reviews</p>
-              </div>
             </div>
           </div>
         </div>
