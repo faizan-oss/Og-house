@@ -54,8 +54,16 @@ export const foodAPI = {
   getFoodsBySubCategory: (subCategory) => api.get(`/food?subCategory=${subCategory}`),
   searchFoods: (query) => api.get(`/food?search=${query}`),
   // Admin endpoints
-  createFood: (foodData) => api.post('/food', foodData),
-  updateFood: (id, foodData) => api.put(`/food/${id}`, foodData),
+  createFood: (foodData) => api.post('/food', foodData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
+  updateFood: (id, foodData) => api.put(`/food/${id}`, foodData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
   deleteFood: (id) => api.delete(`/food/${id}`),
   uploadImage: (imageFile) => {
     const formData = new FormData();

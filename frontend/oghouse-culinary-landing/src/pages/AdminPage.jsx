@@ -57,11 +57,16 @@ const AdminPage = () => {
         adminAPI.getDashboardStats()
       ]);
       
-      setFoods(foodsRes.data);
-      setOrders(ordersRes.data);
-      setStats(statsRes.data);
+      setFoods(Array.isArray(foodsRes.data) ? foodsRes.data : []);
+      setOrders(Array.isArray(ordersRes.data) ? ordersRes.data : []);
+      setStats(statsRes.data || {});
     } catch (error) {
+      console.error('Fetch data error:', error);
       toast.error('Failed to fetch data');
+      // Set default values on error
+      setFoods([]);
+      setOrders([]);
+      setStats({});
     } finally {
       setLoading(false);
     }
@@ -79,23 +84,24 @@ const AdminPage = () => {
     try {
       setLoading(true);
       
-      let imageUrl = '';
+      // Create FormData for multipart/form-data request
+      const formData = new FormData();
+      formData.append('name', foodForm.name);
+      formData.append('description', foodForm.description);
+      formData.append('price', foodForm.price);
+      formData.append('mainCategory', foodForm.mainCategory);
+      formData.append('subCategory', foodForm.subCategory);
+      formData.append('isAvailable', foodForm.isAvailable);
+      
       if (foodForm.image) {
-        const uploadRes = await foodAPI.uploadImage(foodForm.image);
-        imageUrl = uploadRes.data.url;
+        formData.append('image', foodForm.image);
       }
 
-      const foodData = {
-        ...foodForm,
-        price: parseFloat(foodForm.price),
-        image: imageUrl
-      };
-
       if (editingFood) {
-        await foodAPI.updateFood(editingFood._id, foodData);
+        await foodAPI.updateFood(editingFood._id, formData);
         toast.success('Food item updated successfully');
       } else {
-        await foodAPI.createFood(foodData);
+        await foodAPI.createFood(formData);
         toast.success('Food item added successfully');
       }
 
@@ -246,9 +252,9 @@ const AdminPage = () => {
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{foods.length}</div>
+                <div className="text-2xl font-bold">{foods?.length || 0}</div>
                 <p className="text-xs text-muted-foreground">
-                  {foods.filter(f => f.isAvailable).length} available
+                  {foods?.filter(f => f.isAvailable)?.length || 0} available
                 </p>
               </CardContent>
             </Card>
@@ -261,7 +267,7 @@ const AdminPage = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {orders.slice(0, 5).map((order) => (
+                  {orders?.slice(0, 5)?.map((order) => (
                     <div key={order._id} className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Order #{order._id.slice(-6)}</p>
@@ -369,13 +375,23 @@ const AdminPage = () => {
                     </div>
                     <div>
                       <Label htmlFor="subCategory">Sub Category</Label>
-                      <Input
+                      <select
                         id="subCategory"
                         value={foodForm.subCategory}
                         onChange={(e) => setFoodForm(prev => ({ ...prev, subCategory: e.target.value }))}
-                        placeholder="e.g., burger, pizza"
+                        className="w-full p-2 border rounded-md"
                         required
-                      />
+                      >
+                        <option value="">Select sub category</option>
+                        <option value="salad">Salad</option>
+                        <option value="appetizers">Appetizers</option>
+                        <option value="wings">Wings</option>
+                        <option value="burger">Burger</option>
+                        <option value="sandwich">Sandwich</option>
+                        <option value="main-course">Main Course</option>
+                        <option value="combos">Combos</option>
+                        <option value="beverage">Beverage</option>
+                      </select>
                     </div>
                     <div>
                       <Label htmlFor="image">Image</Label>
@@ -429,7 +445,7 @@ const AdminPage = () => {
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {foods.map((food) => (
+            {foods?.map((food) => (
               <Card key={food._id}>
                 <div className="relative">
                   <img
@@ -486,7 +502,7 @@ const AdminPage = () => {
           <h2 className="text-2xl font-bold">Order Management</h2>
           
           <div className="space-y-4">
-            {orders.map((order) => (
+            {orders?.map((order) => (
               <Card key={order._id}>
                 <CardContent className="p-6">
                   <div className="flex justify-between items-start mb-4">

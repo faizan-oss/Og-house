@@ -4,12 +4,12 @@ const fs = require("fs");
 
 exports.addFood = async (req, res) => {
     try {
-        const { name, description, price, category } = req.body;
+        const { name, description, price, mainCategory, subCategory, isAvailable } = req.body;
 
         // Validate required fields
-        if (!name || !price || !category) {
+        if (!name || !price || !mainCategory || !subCategory) {
             return res.status(400).json({ 
-                message: "Name, price, and category are required fields" 
+                message: "Name, price, mainCategory, and subCategory are required fields" 
             });
         }
 
@@ -31,8 +31,10 @@ exports.addFood = async (req, res) => {
             name,
             description,
             price: parseFloat(price),
-            category,
-            image: result.secure_url
+            mainCategory,
+            subCategory,
+            image: result.secure_url,
+            isAvailable: isAvailable !== undefined ? isAvailable : true
         });
 
         await food.save();
@@ -69,11 +71,7 @@ exports.getFoodById = async (req, res) => {
 exports.getFoods = async (req, res) => {
     try {
         const foods = await Food.find().sort({ createdAt: -1 });
-        res.status(200).json({ 
-            message: "Foods retrieved successfully", 
-            count: foods.length, 
-            foods 
-        });
+        res.status(200).json(foods);
     } catch (error) {
         console.error("Error fetching foods:", error);
         res.status(500).json({ message: "Error fetching foods", error: error.message });

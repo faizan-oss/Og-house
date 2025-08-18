@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const path = require("path");
+const { protect, adminOnly } = require("../middleware/authMiddleware");
 const {
     addFood,
     getFoods,
@@ -22,10 +23,12 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Routes
-router.post("/", upload.single("image"), addFood);
+// Public routes (no auth required)
 router.get("/", getFoods);
-router.put("/:id", upload.single("image"), updateFood);
-router.delete("/:id", deleteFood);
 router.get("/:id", getFoodById);
+
+// Admin routes (auth + admin role required)
+router.post("/", protect, adminOnly, upload.single("image"), addFood);
+router.put("/:id", protect, adminOnly, upload.single("image"), updateFood);
+router.delete("/:id", protect, adminOnly, deleteFood);
 module.exports = router;
