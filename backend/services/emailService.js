@@ -203,18 +203,18 @@ function buildOrderEmailHtml(order) {
           
           <div style="background:#f8fafc;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;">
             <table style="border-collapse:collapse;width:100%;">
-              <thead>
+      <thead>
                 <tr style="background:linear-gradient(135deg, #1f2937 0%, #374151 100%);">
                   <th align="left" style="padding:15px;color:#ffffff;font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">Item</th>
                   <th align="center" style="padding:15px;color:#ffffff;font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">Qty</th>
                   <th align="right" style="padding:15px;color:#ffffff;font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">Price</th>
                   <th align="right" style="padding:15px;color:#ffffff;font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${itemsRows}
-              </tbody>
-            </table>
+        </tr>
+      </thead>
+      <tbody>
+        ${itemsRows}
+      </tbody>
+    </table>
             
             <!-- Totals Section -->
             <div style="background:#ffffff;padding:20px;border-top:1px solid #e2e8f0;">
