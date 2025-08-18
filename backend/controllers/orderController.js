@@ -100,12 +100,20 @@ exports.createOrderFromCart = async (req, res) => {
             const populated = await Order.findById(order._id).populate('items.food');
             if (populated) {
                 console.log('📧 Sending email notification...');
+                console.log('📋 Populated order data:', {
+                    id: populated._id,
+                    idType: typeof populated._id,
+                    customerName: populated.customerName,
+                    items: populated.items?.length || 0
+                });
                 await sendOrderPlacedEmail(populated);
                 console.log('✅ Email notification sent successfully');
                 
                 console.log('📱 Sending real-time notification...');
                 notifyAdminNewOrder(populated);
                 console.log('✅ Real-time notification sent successfully');
+            } else {
+                console.log('⚠️ Could not populate order for notifications');
             }
         } catch (notificationError) {
             console.error('❌ Error sending notifications:', notificationError);
@@ -160,7 +168,7 @@ exports.getOrderTracking = async (req, res) => {
 // Update order status (Admin only)
 exports.updateOrderStatus = async (req, res) => {
     try {
-        const { orderId } = req.params;
+        const { id: orderId } = req.params;
         const { 
             status, 
             notes, 
@@ -169,10 +177,16 @@ exports.updateOrderStatus = async (req, res) => {
             deliveryNotes 
         } = req.body;
 
+        console.log('🔄 Updating order status:', { orderId, status, notes });
+        console.log('📋 Request params:', req.params);
+        console.log('📋 Request body:', req.body);
+
         const order = await Order.findById(orderId);
         if (!order) {
+            console.log('❌ Order not found:', orderId);
             return res.status(404).json({ message: 'Order not found' });
         }
+        console.log('✅ Order found:', order._id, 'Current status:', order.status);
 
         const oldStatus = order.status;
         
@@ -214,7 +228,7 @@ exports.updateOrderStatus = async (req, res) => {
 // Mark order as delivered
 exports.markOrderDelivered = async (req, res) => {
     try {
-        const { orderId } = req.params;
+        const { id: orderId } = req.params;
         const { deliveryNotes } = req.body;
 
         const order = await Order.findById(orderId);

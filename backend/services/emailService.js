@@ -127,7 +127,7 @@ function buildOrderEmailHtml(order) {
       <!-- Order Summary Header -->
       <div style="background:#f8fafc;padding:25px;border-bottom:1px solid #e2e8f0;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-          <h2 style="margin:0;color:#1e293b;font-size:20px;font-weight:600;">Order #${order._id.slice(-8).toUpperCase()}</h2>
+          <h2 style="margin:0;color:#1e293b;font-size:20px;font-weight:600;">Order #${String(order._id).slice(-8).toUpperCase()}</h2>
           <span style="background:#10b981;color:white;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">${order.status || 'Pending'}</span>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;color:#64748b;font-size:13px;">
@@ -264,6 +264,14 @@ function buildOrderEmailHtml(order) {
 
 async function sendOrderPlacedEmail(order) {
   console.log('📧 Attempting to send email notification...');
+  console.log('📋 Order data received:', {
+    id: order._id,
+    idType: typeof order._id,
+    customerName: order.customerName,
+    orderType: order.orderType,
+    totalAmount: order.totalAmount,
+    finalAmount: order.finalAmount
+  });
   
   const transporter = getTransporter();
   if (!transporter) {
@@ -279,7 +287,7 @@ async function sendOrderPlacedEmail(order) {
   }
   console.log('✅ Admin recipients found:', to);
 
-  const subject = `New ${order.orderType || 'Delivery'} Order #${order._id.slice(-8).toUpperCase()} | ${order.customerName || 'Customer'} | ₹${order.finalAmount || order.totalAmount || 0} | The OG House`;
+  const subject = `New ${order.orderType || 'Delivery'} Order #${String(order._id).slice(-8).toUpperCase()} | ${order.customerName || 'Customer'} | ₹${order.finalAmount || order.totalAmount || 0} | The OG House`;
   const html = buildOrderEmailHtml(order);
 
   try {
