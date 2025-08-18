@@ -24,6 +24,7 @@ const foodRoutes = require("./routes/foodRoutes");
 const menuRoutes = require("./routes/menuRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const cartRoutes = require("./routes/cartRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 //const paymentRoutes = require("./routes/paymentRoutes");//
 
 // Routes
@@ -32,6 +33,7 @@ app.use("/api/food", foodRoutes);
 app.use("/api/menu", menuRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/admin", adminRoutes);
 //app.use("/api/payments", paymentRoutes);*/
 
 // Test endpoint

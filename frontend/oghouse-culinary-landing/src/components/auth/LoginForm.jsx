@@ -5,23 +5,28 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 const LoginForm = ({ onSwitchToRegister, onSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
   const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!email || !password) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+
     setIsLoading(true);
-    
     try {
       const success = await login(email, password);
-      if (success && onSuccess) {
-        onSuccess();
+      if (success) {
+        onSuccess?.();
       }
     } finally {
       setIsLoading(false);
@@ -29,12 +34,10 @@ const LoginForm = ({ onSwitchToRegister, onSuccess }) => {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-md mx-auto border-0 shadow-none">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
-        <CardDescription>
-          Sign in to your account to continue ordering delicious food
-        </CardDescription>
+        <CardDescription>Sign in to your account to continue</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -53,7 +56,7 @@ const LoginForm = ({ onSwitchToRegister, onSuccess }) => {
               />
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <div className="relative">
@@ -78,26 +81,20 @@ const LoginForm = ({ onSwitchToRegister, onSuccess }) => {
               </Button>
             </div>
           </div>
-          
-          <Button 
-            type="submit" 
-            className="w-full py-3 text-sm rounded-full"
-            disabled={isLoading}
-          >
+
+          <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? 'Signing In...' : 'Sign In'}
           </Button>
-          
-          <div className="mt-6 text-center">
-            <p className="text-sm text-muted-foreground">
-              Don't have an account?{' '}
-              <Button
-                variant="link"
-                className="p-0 h-auto font-semibold text-primary"
-                onClick={onSwitchToRegister}
-              >
-                Sign up now
-              </Button>
-            </p>
+
+          <div className="text-center text-sm">
+            Don&apos;t have an account?{' '}
+            <Button
+              variant="link"
+              className="p-0 h-auto font-semibold text-primary"
+              onClick={onSwitchToRegister}
+            >
+              Sign up now
+            </Button>
           </div>
         </form>
       </CardContent>
