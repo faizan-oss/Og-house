@@ -161,8 +161,8 @@ const orderSchema = new mongoose.Schema({
   },
   orderType: {
     type: String,
-    enum: ['Delivery', 'Pickup'],
-    default: 'Delivery'
+    enum: ['delivery', 'pickup'],
+    default: 'delivery'
   },
   priority: {
     type: String,
