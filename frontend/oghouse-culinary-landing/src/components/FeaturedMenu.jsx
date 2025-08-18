@@ -15,7 +15,7 @@ const FeaturedMenu = () => {
   const navigate = useNavigate();
 
   // Function to truncate description and check if truncation is needed
-  const getTruncatedDescription = (description, maxLength = 80) => {
+  const getTruncatedDescription = (description, maxLength = 50) => {
     if (!description) return { text: '', isTruncated: false };
     if (description.length <= maxLength) return { text: description, isTruncated: false };
     return {

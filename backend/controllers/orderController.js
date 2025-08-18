@@ -39,7 +39,13 @@ exports.createOrderFromCart = async (req, res) => {
             deliveryAddress, 
             specialInstructions, 
             orderType = 'Delivery',
-            phone 
+            phone,
+            customerName,
+            email,
+            address,
+            city,
+            pincode,
+            paymentMethod
         } = req.body;
         
         // Get user's cart
@@ -52,8 +58,11 @@ exports.createOrderFromCart = async (req, res) => {
 
         // Create order from cart items with enhanced details
         const orderData = {
-            customerName: req.user.name,
+            customerName: customerName || req.user.name,
             userId: req.user.id,
+            email: email || req.user.email,
+            phone: phone || req.user.phone,
+            paymentMethod: paymentMethod || 'cod',
             items: cart.items.map(item => ({
                 food: item.food._id,
                 quantity: item.quantity,
@@ -62,7 +71,9 @@ exports.createOrderFromCart = async (req, res) => {
             })),
             totalAmount: cart.totalAmount,
             deliveryDetails: {
-                address: deliveryAddress || 'Not specified',
+                address: address || deliveryAddress || 'Not specified',
+                city: city || '',
+                pincode: pincode || '',
                 phone: phone || req.user.phone || ''
             },
             specialInstructions: specialInstructions || '',
@@ -85,10 +96,16 @@ exports.createOrderFromCart = async (req, res) => {
 
         // Send notifications
         try {
+            console.log('🔔 Sending notifications for order:', order._id);
             const populated = await Order.findById(order._id).populate('items.food');
             if (populated) {
+                console.log('📧 Sending email notification...');
                 await sendOrderPlacedEmail(populated);
+                console.log('✅ Email notification sent successfully');
+                
+                console.log('📱 Sending real-time notification...');
                 notifyAdminNewOrder(populated);
+                console.log('✅ Real-time notification sent successfully');
             }
         } catch (notificationError) {
             console.error('❌ Error sending notifications:', notificationError);

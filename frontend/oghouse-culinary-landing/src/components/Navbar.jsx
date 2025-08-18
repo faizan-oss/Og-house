@@ -55,11 +55,9 @@ const Navbar = () => {
   const handleSearch = async (query) => {
     try {
       setIsSearching(true);
-      console.log('Searching for:', query); // Debug log
       
       // Try backend search first
       const response = await foodAPI.searchFoods(query);
-      console.log('Search response:', response); // Debug log
       let foods = Array.isArray(response.data) ? response.data : [];
       
       // If backend returns all foods (not filtered), do frontend filtering as fallback
@@ -77,7 +75,6 @@ const Navbar = () => {
         // If filtered results are significantly smaller, backend likely didn't filter
         if (filteredFoods.length < originalCount * 0.8) {
           foods = filteredFoods;
-          console.log('Applied frontend filtering, results:', foods.length);
         }
         
         // Sort by relevance (exact match first, then starts with, then contains)
@@ -101,7 +98,6 @@ const Navbar = () => {
         });
       }
       
-      console.log('Final filtered foods:', foods); // Debug log
       setSearchResults(foods.slice(0, 5)); // Limit to 5 results
       setShowSearchResults(foods.length > 0);
     } catch (error) {

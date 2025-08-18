@@ -56,7 +56,7 @@ const CheckoutForm = ({ onBack, onSuccess }) => {
         items: cart.items.map(item => ({
           food: item.food?._id || item._id,
           quantity: item.quantity,
-          price: item.price
+          price: item.food?.price || item.price
         })),
         totalAmount: cart.totalPrice,
         deliveryFee: formData.orderType === 'delivery' ? 40 : 0,
@@ -106,13 +106,13 @@ const CheckoutForm = ({ onBack, onSuccess }) => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="w-full p-4 pb-6">
       <div className="mb-6">
         <Button onClick={onBack} variant="ghost" className="mb-4">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Cart
         </Button>
-        <h1 className="text-3xl font-bold text-foreground">Checkout</h1>
+        <h1 className="text-2xl font-bold text-foreground">Checkout</h1>
         <p className="text-muted-foreground">Complete your order details</p>
       </div>
 
@@ -151,7 +151,7 @@ const CheckoutForm = ({ onBack, onSuccess }) => {
               </div>
               
               <div>
-                <Label htmlFor="email">Email (Optional)</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   name="email"
@@ -287,11 +287,11 @@ const CheckoutForm = ({ onBack, onSuccess }) => {
                     <div>
                       <p className="font-medium">{item.food?.name || item.name}</p>
                       <p className="text-sm text-muted-foreground">
-                        Qty: {item.quantity} × ₹{item.price}
+                        Qty: {item.quantity} × ₹{item.food?.price || item.price}
                       </p>
                     </div>
                   </div>
-                  <span className="font-semibold">₹{item.price * item.quantity}</span>
+                  <span className="font-semibold">₹{(item.food?.price || item.price) * item.quantity}</span>
                 </div>
               ))}
               

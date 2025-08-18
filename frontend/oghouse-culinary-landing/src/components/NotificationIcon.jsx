@@ -5,52 +5,96 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { notificationAPI } from '@/lib/api.js';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
+import io from 'socket.io-client';
 
 const NotificationIcon = () => {
   const [notifications, setNotifications] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const { user } = useAuth();
 
   useEffect(() => {
-    fetchNotifications();
-    // Set up polling for new notifications
-    const interval = setInterval(fetchNotifications, 30000); // Check every 30 seconds
-    return () => clearInterval(interval);
-  }, []);
+    if (!user) return;
 
-  const fetchNotifications = async () => {
-    try {
-      const response = await notificationAPI.getNotifications();
-      setNotifications(response.data);
-      setUnreadCount(response.data.filter(n => !n.isRead).length);
-    } catch (error) {
-      console.error('Failed to fetch notifications:', error);
+    // Connect to Socket.IO server
+    const socket = io('https://og-house.onrender.com');
+
+    // Join appropriate room based on user role
+    if (user.role === 'admin') {
+      socket.emit('join-admin');
+      console.log('Admin joined notification room');
+    } else {
+      socket.emit('join-user', user.id);
+      console.log('User joined notification room:', user.id);
     }
+
+    // Listen for admin notifications (new orders)
+    if (user.role === 'admin') {
+      socket.on('new-order', (data) => {
+        console.log('New order notification:', data);
+        const newNotification = {
+          _id: Date.now().toString(),
+          type: 'order_placed',
+          title: 'New Order Received',
+          message: data.message,
+          createdAt: data.timestamp,
+          isRead: false,
+          metadata: data.order
+        };
+        
+        setNotifications(prev => [newNotification, ...prev.slice(0, 19)]); // Keep last 20
+        setUnreadCount(prev => prev + 1);
+        
+        // Show toast notification
+        toast.success('New order received!', {
+          description: data.message
+        });
+      });
+    }
+
+    // Listen for user notifications (order status updates)
+    if (user.role !== 'admin') {
+      socket.on('order-status-update', (data) => {
+        console.log('Order status notification:', data);
+        const newNotification = {
+          _id: Date.now().toString(),
+          type: data.type,
+          title: `Order ${data.status}`,
+          message: data.message,
+          createdAt: data.timestamp,
+          isRead: false,
+          metadata: { orderId: data.orderId, status: data.status }
+        };
+        
+        setNotifications(prev => [newNotification, ...prev.slice(0, 19)]); // Keep last 20
+        setUnreadCount(prev => prev + 1);
+        
+        // Show toast notification
+        toast.info('Order Update', {
+          description: data.message
+        });
+      });
+    }
+
+    return () => {
+      socket.disconnect();
+      console.log('Socket disconnected');
+    };
+  }, [user]);
+
+  const markAsRead = (id) => {
+    setNotifications(prev => 
+      prev.map(n => n._id === id ? { ...n, isRead: true } : n)
+    );
+    setUnreadCount(prev => Math.max(0, prev - 1));
   };
 
-  const markAsRead = async (id) => {
-    try {
-      await notificationAPI.markAsRead(id);
-      setNotifications(prev => 
-        prev.map(n => n._id === id ? { ...n, isRead: true } : n)
-      );
-      setUnreadCount(prev => Math.max(0, prev - 1));
-    } catch (error) {
-      toast.error('Failed to mark notification as read');
-    }
-  };
-
-  const markAllAsRead = async () => {
-    try {
-      await notificationAPI.markAllAsRead();
-      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-      setUnreadCount(0);
-      toast.success('All notifications marked as read');
-    } catch (error) {
-      toast.error('Failed to mark all notifications as read');
-    }
+  const markAllAsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    setUnreadCount(0);
+    toast.success('All notifications marked as read');
   };
 
   const getNotificationIcon = (type) => {

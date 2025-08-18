@@ -42,39 +42,51 @@ function getIO() {
 
 // Notify admins about new order
 function notifyAdminNewOrder(order) {
-  const io = getIO();
-  io.to('admin-room').emit('new-order', {
-    type: 'new-order',
-    order: {
-      id: order._id,
-      customerName: order.customerName,
-      totalAmount: order.totalAmount,
-      status: order.status,
-      createdAt: order.createdAt,
-      items: order.items
-    },
-    message: `New order placed by ${order.customerName}`,
-    timestamp: new Date()
-  });
+  try {
+    const io = getIO();
+    io.to('admin-room').emit('new-order', {
+      type: 'new-order',
+      order: {
+        id: order._id,
+        customerName: order.customerName,
+        totalAmount: order.totalAmount,
+        status: order.status,
+        createdAt: order.createdAt,
+        items: order.items
+      },
+      message: `New order placed by ${order.customerName} for $${order.totalAmount}`,
+      timestamp: new Date()
+    });
+    console.log(`📢 Admin notification sent: New order from ${order.customerName}`);
+  } catch (error) {
+    console.error('Error in notifyAdminNewOrder:', error);
+  }
 }
 
 // Notify user about order status change
 function notifyUserOrderStatusChange(userId, order, newStatus) {
-  const io = getIO();
-  const statusMessages = {
-    'Accepted': 'Your order has been accepted and is being prepared!',
-    'On The Way': 'Your order is on the way!',
-    'Completed': 'Your order has been completed. Enjoy your meal!',
-    'Cancelled': 'Your order has been cancelled.'
-  };
+  try {
+    const statusMessages = {
+      'Accepted': 'Your order has been accepted and is being prepared!',
+      'On The Way': 'Your order is on the way!',
+      'Completed': 'Your order has been completed. Enjoy your meal!',
+      'Cancelled': 'Your order has been cancelled.'
+    };
 
-  io.to(`user-${userId}`).emit('order-status-update', {
-    type: 'order-status-update',
-    orderId: order._id,
-    status: newStatus,
-    message: statusMessages[newStatus] || `Order status updated to ${newStatus}`,
-    timestamp: new Date()
-  });
+    const message = statusMessages[newStatus] || `Order status updated to ${newStatus}`;
+    
+    const io = getIO();
+    io.to(`user-${userId}`).emit('order-status-update', {
+      type: 'order-status-update',
+      orderId: order._id,
+      status: newStatus,
+      message: message,
+      timestamp: new Date()
+    });
+    console.log(`📱 User notification sent: ${message} (User: ${userId})`);
+  } catch (error) {
+    console.error('Error in notifyUserOrderStatusChange:', error);
+  }
 }
 
 // Notify user about order acceptance

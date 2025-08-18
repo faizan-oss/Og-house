@@ -7,16 +7,21 @@ import { Trash2, Plus, Minus, ShoppingCart, ArrowRight } from 'lucide-react';
 import { useCart } from '@/hooks/useCart.js';
 import { cartAPI } from '@/lib/api.js';
 import { toast } from 'sonner';
+import CheckoutForm from './CheckoutForm.jsx';
 
 const CartSheet = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
   const { totalItems, refreshCart } = useCart();
 
   useEffect(() => {
     if (isOpen) {
       fetchCart();
+    } else {
+      // Reset checkout view when sheet is closed
+      setShowCheckout(false);
     }
   }, [isOpen]);
 
@@ -69,7 +74,10 @@ const CartSheet = ({ children }) => {
   };
 
   const calculateTotal = () => {
-    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cartItems.reduce((total, item) => {
+      const price = item.food?.price || item.price || 0;
+      return total + (price * item.quantity);
+    }, 0);
   };
 
   const getTotalItems = () => {
@@ -82,10 +90,18 @@ const CartSheet = ({ children }) => {
       return;
     }
     
-    // Navigate to checkout page or open checkout form
+    setShowCheckout(true);
+  };
+
+  const handleBackFromCheckout = () => {
+    setShowCheckout(false);
+  };
+
+  const handleCheckoutSuccess = (orderData) => {
+    setShowCheckout(false);
     setIsOpen(false);
-    // You can implement navigation to checkout page here
-    toast.info('Proceeding to checkout...');
+    setCartItems([]);
+    toast.success('Order placed successfully!');
   };
 
   return (
@@ -93,20 +109,30 @@ const CartSheet = ({ children }) => {
       <SheetTrigger asChild>
         {children}
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-md">
-        <SheetHeader>
-          <SheetTitle className="flex items-center gap-2">
-            <ShoppingCart className="h-5 w-5" />
-            Shopping Cart
-            {totalItems > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                {totalItems}
-              </Badge>
-            )}
-          </SheetTitle>
-        </SheetHeader>
+      <SheetContent className={`w-full ${showCheckout ? 'sm:max-w-4xl' : 'sm:max-w-md'}`}>
+        {!showCheckout && (
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
+              <ShoppingCart className="h-5 w-5" />
+              Shopping Cart
+              {totalItems > 0 && (
+                <Badge variant="secondary" className="ml-2">
+                  {totalItems}
+                </Badge>
+              )}
+            </SheetTitle>
+          </SheetHeader>
+        )}
 
-        <div className="flex flex-col h-full">
+        {showCheckout ? (
+          <div className="h-full overflow-y-auto">
+            <CheckoutForm 
+              onBack={handleBackFromCheckout}
+              onSuccess={handleCheckoutSuccess}
+            />
+          </div>
+        ) : (
+          <div className="flex flex-col h-full">
           {isLoading ? (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
@@ -142,7 +168,7 @@ const CartSheet = ({ children }) => {
                         {item.food?.name || item.name}
                       </h4>
                       <p className="text-sm text-muted-foreground mb-2">
-                        ₹{item.price} each
+                        ₹{item.food?.price || item.price || 0} each
                       </p>
                       
                       <div className="flex items-center justify-between">
@@ -173,7 +199,7 @@ const CartSheet = ({ children }) => {
                         
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-primary">
-                            ₹{item.price * item.quantity}
+                            ₹{(item.food?.price || item.price || 0) * item.quantity}
                           </span>
                           <Button
                             size="sm"
@@ -226,7 +252,8 @@ const CartSheet = ({ children }) => {
               </div>
             </>
           )}
-        </div>
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   );
