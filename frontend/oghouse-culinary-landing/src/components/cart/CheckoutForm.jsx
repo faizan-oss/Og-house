@@ -15,6 +15,9 @@ const CheckoutForm = ({ onBack, onSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { cart, clearCart } = useCart();
 
+  // Debug cart data
+  console.log('Checkout cart data:', cart);
+
   const [formData, setFormData] = useState({
     customerName: '',
     phone: '',
@@ -58,9 +61,9 @@ const CheckoutForm = ({ onBack, onSuccess }) => {
           quantity: item.quantity,
           price: item.food?.price || item.price
         })),
-        totalAmount: cart.totalPrice,
+        totalAmount: calculateSubtotal(),
         deliveryFee: formData.orderType === 'delivery' ? 40 : 0,
-        finalAmount: formData.orderType === 'delivery' ? cart.totalPrice + 40 : cart.totalPrice
+        finalAmount: calculateTotal()
       };
 
       const response = await orderAPI.createOrderFromCart(orderData);
@@ -82,8 +85,15 @@ const CheckoutForm = ({ onBack, onSuccess }) => {
     }
   };
 
+  const calculateSubtotal = () => {
+    return cart.items?.reduce((total, item) => {
+      const price = item.food?.price || item.price || 0;
+      return total + (price * item.quantity);
+    }, 0) || 0;
+  };
+
   const calculateTotal = () => {
-    const subtotal = cart.totalPrice;
+    const subtotal = calculateSubtotal();
     const deliveryFee = formData.orderType === 'delivery' ? 40 : 0;
     return subtotal + deliveryFee;
   };
@@ -300,7 +310,7 @@ const CheckoutForm = ({ onBack, onSuccess }) => {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span>₹{cart.totalPrice}</span>
+                  <span>₹{calculateSubtotal()}</span>
                 </div>
                 {formData.orderType === 'delivery' && (
                   <div className="flex justify-between">
