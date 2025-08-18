@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -193,7 +194,17 @@ const AdminPage = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
+        <div className="flex items-center space-x-4 mb-2">
+          <Link to="/" className="cursor-pointer">
+            <img
+              src="/lovable-uploads/6c5b80cf-9d75-46fb-a308-4f9f0704f8bf.png"
+              
+              alt="The OG House Logo"
+              className="h-12 w-auto hover:opacity-80 transition-opacity"
+            />
+          </Link>
+          <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
+        </div>
         <p className="text-muted-foreground">Manage your restaurant operations</p>
       </div>
 
@@ -290,17 +301,28 @@ const AdminPage = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <Button 
-                  onClick={() => setShowAddFood(true)} 
+                  onClick={() => {
+                    setActiveTab('foods');
+                    setShowAddFood(true);
+                  }} 
                   className="w-full"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add New Food Item
                 </Button>
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => setActiveTab('orders')}
+                >
                   <Package className="h-4 w-4 mr-2" />
                   View All Orders
                 </Button>
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => setActiveTab('users')}
+                >
                   <Users className="h-4 w-4 mr-2" />
                   Manage Users
                 </Button>

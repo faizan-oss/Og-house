@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Clock, Truck } from "lucide-react";
 
@@ -21,11 +22,23 @@ const Hero = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="default" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-3 text-base rounded-full shadow-elegant transition-all duration-300 hover:shadow-xl hover:scale-105 flex items-center justify-center">
-                Order Now
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <Button variant="outline" size="default" className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-6 py-3 text-base rounded-full transition-all duration-300 flex items-center justify-center">
+              <Link to="/menu">
+                <Button size="default" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-3 text-base rounded-full shadow-elegant transition-all duration-300 hover:shadow-xl hover:scale-105 flex items-center justify-center w-full sm:w-auto">
+                  Order Now
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+              <Button 
+                variant="outline" 
+                size="default" 
+                className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-6 py-3 text-base rounded-full transition-all duration-300 flex items-center justify-center w-full sm:w-auto"
+                onClick={() => {
+                  const featuredSection = document.getElementById('featured-menu');
+                  if (featuredSection) {
+                    featuredSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+              >
                 View Menu
               </Button>
             </div>

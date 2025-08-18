@@ -8,6 +8,7 @@ import Index from "./pages/Index.jsx";
 import MenuPage from "./pages/MenuPage.jsx";
 import MyOrdersPage from "./pages/MyOrdersPage.jsx";
 import AdminPage from "./pages/AdminPage.jsx";
+import FoodDetailPage from "./pages/FoodDetailPage.jsx";
 import NotFound from "./pages/NotFound.jsx";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/menu" element={<MenuPage />} />
+            <Route path="/food/:id" element={<FoodDetailPage />} />
             <Route path="/my-orders" element={<MyOrdersPage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="*" element={<NotFound />} />

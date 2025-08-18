@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Instagram, Facebook, Twitter, Phone, Mail, MapPin } from "lucide-react";
@@ -30,11 +31,13 @@ const Footer = () => {
         <div className="py-12 grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-6">
-            <img 
-              src="/lovable-uploads/6c5b80cf-9d75-46fb-a308-4f9f0704f8bf.png" 
-              alt="The OG House Logo" 
-              className="h-20 w-20  "
-            />
+            <Link to="/" className="cursor-pointer">
+              <img 
+                src="/lovable-uploads/6c5b80cf-9d75-46fb-a308-4f9f0704f8bf.png" 
+                alt="The OG House Logo" 
+                className="h-20 w-20 hover:opacity-80 transition-opacity"
+              />
+            </Link>
             <p className="text-background/80 leading-relaxed">
               Refined American fare delivered with passion. Experience exceptional flavors 
               crafted by our expert chefs.
@@ -56,11 +59,11 @@ const Footer = () => {
           <div className="space-y-6">
             <h4 className="text-lg font-bold">Quick Links</h4>
             <ul className="space-y-3 text-background/80">
-              <li><a href="#" className="hover:text-background transition-colors">Menu</a></li>
-              <li><a href="#" className="hover:text-background transition-colors">About Us</a></li>
-              <li><a href="#" className="hover:text-background transition-colors">Contact</a></li>
-              <li><a href="#" className="hover:text-background transition-colors">Catering</a></li>
-              <li><a href="#" className="hover:text-background transition-colors">Gift Cards</a></li>
+              <li><Link to="/menu" className="hover:text-background transition-colors">Menu</Link></li>
+              <li><Link to="/#about" className="hover:text-background transition-colors">About Us</Link></li>
+              <li><a href="tel:+917070893997" className="hover:text-background transition-colors">Contact</a></li>
+              <li><a href="mailto:Theoghouze@gmail.com" className="hover:text-background transition-colors">Catering</a></li>
+              <li><Link to="/" className="hover:text-background transition-colors">Gift Cards</Link></li>
             </ul>
           </div>
 
@@ -68,11 +71,11 @@ const Footer = () => {
           <div className="space-y-6">
             <h4 className="text-lg font-bold">Support</h4>
             <ul className="space-y-3 text-background/80">
-              <li><a href="#" className="hover:text-background transition-colors">Track Order</a></li>
-              <li><a href="#" className="hover:text-background transition-colors">Help Center</a></li>
-              <li><a href="#" className="hover:text-background transition-colors">Refund Policy</a></li>
-              <li><a href="#" className="hover:text-background transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-background transition-colors">Privacy Policy</a></li>
+              <li><Link to="/my-orders" className="hover:text-background transition-colors">Track Order</Link></li>
+              <li><a href="mailto:Theoghouze@gmail.com" className="hover:text-background transition-colors">Help Center</a></li>
+              <li><Link to="/" className="hover:text-background transition-colors">Refund Policy</Link></li>
+              <li><Link to="/" className="hover:text-background transition-colors">Terms of Service</Link></li>
+              <li><Link to="/" className="hover:text-background transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
 

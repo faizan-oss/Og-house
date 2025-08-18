@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Star, Leaf, Search, Filter, SortAsc, SortDesc } from 'lucide-react';
+import { Plus, Star, Leaf, Search, Filter, SortAsc, SortDesc, Eye } from 'lucide-react';
 import { foodAPI } from '@/lib/api.js';
 import { useCart } from '@/hooks/useCart.js';
 import { toast } from 'sonner';
@@ -22,6 +23,17 @@ const MenuGrid = () => {
   const [vegFilter, setVegFilter] = useState('all');
   
   const { addToCart } = useCart();
+  const navigate = useNavigate();
+
+  // Function to truncate description and check if truncation is needed
+  const getTruncatedDescription = (description, maxLength = 80) => {
+    if (!description) return { text: '', isTruncated: false };
+    if (description.length <= maxLength) return { text: description, isTruncated: false };
+    return {
+      text: description.slice(0, maxLength) + '...',
+      isTruncated: true
+    };
+  };
 
   const categories = [
     { value: 'all', label: 'All Items' },
@@ -347,7 +359,25 @@ const MenuGrid = () => {
               <div className="p-4 space-y-3">
                 <div>
                   <h3 className="font-bold text-lg text-foreground mb-1">{food.name}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2">{food.description}</p>
+                  {(() => {
+                    const { text, isTruncated } = getTruncatedDescription(food.description);
+                    return (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">{text}</p>
+                        {isTruncated && (
+                          <Button
+                            variant="link"
+                            size="sm"
+                            onClick={() => navigate(`/food/${food._id}`)}
+                            className="h-auto p-0 text-primary text-xs"
+                          >
+                            <Eye className="h-3 w-3 mr-1" />
+                            See More
+                          </Button>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
                 
                 <div className="flex items-center justify-between">

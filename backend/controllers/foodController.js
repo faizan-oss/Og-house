@@ -70,7 +70,60 @@ exports.getFoodById = async (req, res) => {
 
 exports.getFoods = async (req, res) => {
     try {
-        const foods = await Food.find().sort({ createdAt: -1 });
+        const { search, category, subCategory } = req.query;
+        let query = {};
+
+        // Search functionality
+        if (search) {
+            query.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { description: { $regex: search, $options: 'i' } },
+                { subCategory: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        // Category filtering
+        if (category && category !== 'all') {
+            query.mainCategory = category;
+        }
+
+        // SubCategory filtering
+        if (subCategory && subCategory !== 'all') {
+            query.subCategory = subCategory;
+        }
+
+        let foods;
+        
+        if (search) {
+            // For search, sort by relevance (exact name matches first, then partial matches)
+            foods = await Food.find(query);
+            
+            // Sort by relevance: exact name match > name starts with > name contains > description contains
+            foods = foods.sort((a, b) => {
+                const searchLower = search.toLowerCase();
+                const aNameLower = a.name.toLowerCase();
+                const bNameLower = b.name.toLowerCase();
+                
+                // Exact match
+                if (aNameLower === searchLower && bNameLower !== searchLower) return -1;
+                if (bNameLower === searchLower && aNameLower !== searchLower) return 1;
+                
+                // Starts with
+                if (aNameLower.startsWith(searchLower) && !bNameLower.startsWith(searchLower)) return -1;
+                if (bNameLower.startsWith(searchLower) && !aNameLower.startsWith(searchLower)) return 1;
+                
+                // Contains in name
+                if (aNameLower.includes(searchLower) && !bNameLower.includes(searchLower)) return -1;
+                if (bNameLower.includes(searchLower) && !aNameLower.includes(searchLower)) return 1;
+                
+                // Default alphabetical
+                return aNameLower.localeCompare(bNameLower);
+            });
+        } else {
+            // For no search, sort by creation date
+            foods = await Food.find(query).sort({ createdAt: -1 });
+        }
+        
         res.status(200).json(foods);
     } catch (error) {
         console.error("Error fetching foods:", error);
