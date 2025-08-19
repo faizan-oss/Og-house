@@ -89,29 +89,81 @@ app.get("/api/test-gmail", async (req, res) => {
 app.get("/api/test-notification", async (req, res) => {
   try {
     const { notifyAdminNewOrder, notifyUserOrderStatusChange } = require('./services/notificationService');
-    
-    // Test admin notification
-    const testOrder = {
-      _id: "test_order_123",
-      customerName: "Test Customer",
+    const testOrder = { 
+      _id: 'test_order_123',
+      customerName: 'Test Customer',
       totalAmount: 500,
-      status: "Pending",
+      status: 'Accepted',
       createdAt: new Date(),
-      items: [
-        { food: { name: "Test Pizza", price: 500 } }
-      ]
+      items: [{ food: { name: 'Test Food' } }]
     };
     
+    // Test admin notification
     notifyAdminNewOrder(testOrder);
     
-    // Test user notification
+    // Test user notification after 1 second
     setTimeout(() => {
       notifyUserOrderStatusChange("test_user_123", testOrder, "Accepted");
     }, 1000);
     
     res.json({ 
-      message: "Test notifications sent! Check console and connected clients.",
-      testOrder: testOrder
+      message: "Test notifications sent! Check console and connected clients.", 
+      testOrder: testOrder,
+      note: "Admin notification sent immediately, user notification sent after 1 second"
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Test user notification endpoint
+app.get("/api/test-user-notification/:userId", async (req, res) => {
+  try {
+    const { notifyUserOrderStatusChange } = require('./services/notificationService');
+    const { userId } = req.params;
+    
+    const testOrder = { 
+      _id: 'test_order_456',
+      customerName: 'Test Customer',
+      totalAmount: 750,
+      status: 'Preparing',
+      createdAt: new Date(),
+      items: [{ food: { name: 'Test Food 2' } }]
+    };
+    
+    console.log(`🧪 [Test] Sending test notification to user: ${userId}`);
+    notifyUserOrderStatusChange(userId, testOrder, "Preparing");
+    
+    res.json({ 
+      message: `Test user notification sent to user ${userId}!`, 
+      testOrder: testOrder,
+      targetUserId: userId
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Debug Socket.IO connections endpoint
+app.get("/api/debug-socket", (req, res) => {
+  try {
+    const { getIO } = require('./services/notificationService');
+    const io = getIO();
+    
+    const allSockets = Array.from(io.sockets.sockets.values()).map(socket => ({
+      id: socket.id,
+      rooms: Array.from(socket.rooms)
+    }));
+    
+    const allRooms = Array.from(io.sockets.adapter.rooms.keys());
+    
+    res.json({
+      totalConnections: io.sockets.sockets.size,
+      allSockets: allSockets,
+      allRooms: allRooms,
+      adminRoomExists: allRooms.includes('admin-room'),
+      userRooms: allRooms.filter(room => room.startsWith('user-')),
+      timestamp: new Date()
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
