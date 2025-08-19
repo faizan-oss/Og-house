@@ -4,17 +4,17 @@ import { ArrowRight, Clock, Truck } from "lucide-react";
 
 const Hero = () => {
   return (
-    <section className="relative bg-hero-gradient min-h-[600px] lg:min-h-[700px] flex items-center">
+    <section className="relative bg-hero-gradient min-h-[500px] sm:min-h-[600px] lg:min-h-[700px] flex items-center">
       <div className="container mx-auto px-4 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Hero Content */}
-          <div className="space-y-8 animate-fade-in">
+          <div className="space-y-6 sm:space-y-8 animate-fade-in text-center lg:text-left">
             <div className="space-y-4">
-              <h1 className="text-4xl lg:text-6xl xl:text-7xl font-bold text-foreground leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-6xl xl:text-7xl font-bold text-foreground leading-tight">
                 Refined American
                 <span className="block text-primary">Fare Delivered</span>
               </h1>
-              <p className="text-lg lg:text-xl text-muted-foreground max-w-2xl">
+              <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0">
                 Experience exceptional flavors crafted with passion. From comfort classics to innovative dishes, 
                 we bring restaurant-quality meals straight to your door.
               </p>
@@ -44,7 +44,7 @@ const Hero = () => {
             </div>
 
             {/* Features */}
-            <div className="grid grid-cols-2 gap-6 pt-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 pt-6 sm:pt-8">
               <div className="flex items-center space-x-3">
                 <div className="bg-accent/20 p-3 rounded-full">
                   <Clock className="h-5 w-5 text-accent" />
@@ -67,12 +67,12 @@ const Hero = () => {
           </div>
 
           {/* Hero Image */}
-          <div className="relative lg:order-2">
-            <div className="relative bg-card rounded-3xl shadow-elegant p-8 animate-fade-in">
+          <div className="relative lg:order-2 mt-8 lg:mt-0">
+            <div className="relative bg-card rounded-2xl sm:rounded-3xl shadow-elegant p-4 sm:p-6 lg:p-8 animate-fade-in">
               <img 
                 src="https://res.cloudinary.com/dfpedvv8x/image/upload/v1755247965/food_items/xeqtzhqlgjvqt2uwzgys.png"
                 alt="Gourmet burger and fries"
-                className="w-full h-[400px] lg:h-[500px] object-cover rounded-2xl"
+                className="w-full h-[300px] sm:h-[400px] lg:h-[500px] object-cover rounded-xl sm:rounded-2xl"
               />
             </div>
           </div>

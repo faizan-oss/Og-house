@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
@@ -15,38 +15,105 @@ const RegisterForm = ({ onSwitchToLogin }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const { register } = useAuth();
 
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!name.trim()) {
+      newErrors.name = 'Full name is required';
+    } else if (name.trim().length < 2) {
+      newErrors.name = 'Full name must be at least 2 characters';
+    }
+    
+    if (!email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    
+    if (!password) {
+      newErrors.password = 'Password is required';
+    } else if (password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+    
+    if (!confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (password !== confirmPassword) {
-      toast.error("Passwords don't match");
-      return;
-    }
-
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+    
+    if (!validateForm()) {
       return;
     }
 
     setIsLoading(true);
+    setErrors({}); // Clear previous errors
+    
     try {
       const response = await register(name, email, password);
 
       // ✅ Treat as success if API returned a user object
       if (response?.user) {
-        toast.success(response.message || "Registration successful");
-        onSwitchToLogin(); // switch to login form after success
+        toast.success(response.message || "Registration successful! Please sign in.");
+        // Only switch to login form after successful registration
+        onSwitchToLogin();
+        return; // Exit early on success
       } else {
-        toast.error(response?.message || "Registration failed");
+        // Registration failed - form stays open with error message
+        setErrors({ general: response?.message || "Registration failed. Please try again." });
+        // Form stays open - no navigation
+        return;
       }
     } catch (error) {
-      toast.error(error.message || 'Registration failed');
+      console.error('Registration error:', error);
+      
+      // Handle specific error cases - form stays open
+      if (error.response?.status === 409) {
+        setErrors({ email: 'An account with this email already exists. Please sign in instead.' });
+      } else if (error.response?.status === 400) {
+        setErrors({ general: error.response.data.message || 'Invalid registration data. Please check your information.' });
+      } else if (error.response?.status === 500) {
+        setErrors({ general: 'Server error. Please try again later.' });
+      } else if (error.response?.data?.message) {
+        setErrors({ general: error.response.data.message });
+      } else if (error.message) {
+        setErrors({ general: error.message });
+      } else {
+        setErrors({ general: 'Registration failed. Please try again later.' });
+      }
+      
+      // Form stays open - no navigation on error
+      return;
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleInputChange = (field, value) => {
+    // Clear field-specific error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+    // Clear general error when user makes any change
+    if (errors.general) {
+      setErrors(prev => ({ ...prev, general: '' }));
+    }
+    
+    if (field === 'name') setName(value);
+    if (field === 'email') setEmail(value);
+    if (field === 'password') setPassword(value);
+    if (field === 'confirmPassword') setConfirmPassword(value);
   };
 
   return (
@@ -57,6 +124,14 @@ const RegisterForm = ({ onSwitchToLogin }) => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* General Error Message */}
+          {errors.general && (
+            <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0" />
+              <p className="text-sm text-destructive">{errors.general}</p>
+            </div>
+          )}
+
           {/* Name Input */}
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>
@@ -67,11 +142,17 @@ const RegisterForm = ({ onSwitchToLogin }) => {
                 type="text"
                 placeholder="Enter your full name"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="pl-10"
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                className={`pl-10 ${errors.name ? 'border-destructive focus:border-destructive' : ''}`}
                 required
               />
             </div>
+            {errors.name && (
+              <p className="text-sm text-destructive flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {errors.name}
+              </p>
+            )}
           </div>
 
           {/* Email Input */}
@@ -84,11 +165,17 @@ const RegisterForm = ({ onSwitchToLogin }) => {
                 type="email"
                 placeholder="Enter your email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-10"
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                className={`pl-10 ${errors.email ? 'border-destructive focus:border-destructive' : ''}`}
                 required
               />
             </div>
+            {errors.email && (
+              <p className="text-sm text-destructive flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {errors.email}
+              </p>
+            )}
           </div>
 
           {/* Password Input */}
@@ -101,8 +188,8 @@ const RegisterForm = ({ onSwitchToLogin }) => {
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Create a password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="pl-10 pr-10"
+                onChange={(e) => handleInputChange('password', e.target.value)}
+                className={`pl-10 pr-10 ${errors.password ? 'border-destructive focus:border-destructive' : ''}`}
                 required
                 minLength={6}
               />
@@ -116,6 +203,12 @@ const RegisterForm = ({ onSwitchToLogin }) => {
                 {showPassword ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
               </Button>
             </div>
+            {errors.password && (
+              <p className="text-sm text-destructive flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {errors.password}
+              </p>
+            )}
           </div>
 
           {/* Confirm Password Input */}
@@ -128,8 +221,8 @@ const RegisterForm = ({ onSwitchToLogin }) => {
                 type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="Confirm your password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="pl-10 pr-10"
+                onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                className={`pl-10 pr-10 ${errors.confirmPassword ? 'border-destructive focus:border-destructive' : ''}`}
                 required
               />
               <Button
@@ -142,15 +235,18 @@ const RegisterForm = ({ onSwitchToLogin }) => {
                 {showConfirmPassword ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
               </Button>
             </div>
-            {password && confirmPassword && password !== confirmPassword && (
-              <p className="text-sm text-destructive">Passwords do not match</p>
+            {errors.confirmPassword && (
+              <p className="text-sm text-destructive flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {errors.confirmPassword}
+              </p>
             )}
           </div>
 
           <Button
             type="submit"
             className="w-full"
-            disabled={isLoading || (password !== confirmPassword && confirmPassword !== '')}
+            disabled={isLoading}
           >
             {isLoading ? 'Creating Account...' : 'Create Account'}
           </Button>

@@ -116,7 +116,7 @@ const FoodDetailPage = () => {
         </div>
 
         {/* Food Details */}
-        <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 max-w-6xl mx-auto">
           {/* Image Section */}
           <div className="space-y-4">
             <Card className="overflow-hidden">
@@ -124,7 +124,7 @@ const FoodDetailPage = () => {
                 <img 
                   src={food.image} 
                   alt={food.name}
-                  className="w-full h-[400px] lg:h-[500px] object-cover"
+                  className="w-full h-[300px] sm:h-[400px] lg:h-[500px] object-cover"
                 />
                 <div className="absolute top-4 left-4">
                   <Badge 
@@ -150,7 +150,7 @@ const FoodDetailPage = () => {
           {/* Details Section */}
           <div className="space-y-6">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">{food.name}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">{food.name}</h1>
               <p className="text-sm text-muted-foreground capitalize mb-4">
                 {food.subCategory || food.category}
               </p>

@@ -311,12 +311,12 @@ const MenuGrid = () => {
 
       {/* Category Tabs */}
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-8">
-        <TabsList className="grid w-full grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-2 h-auto p-1">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-2 h-auto p-1 overflow-x-auto">
           {categories.map((category) => (
             <TabsTrigger 
               key={category.value} 
               value={category.value}
-              className="text-xs md:text-sm py-2"
+              className="text-xs md:text-sm py-2 whitespace-nowrap"
             >
               {category.label}
             </TabsTrigger>
@@ -325,7 +325,7 @@ const MenuGrid = () => {
       </Tabs>
 
       {/* Menu Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         {filteredFoods.map((food) => (
           <Card 
             key={food._id} 

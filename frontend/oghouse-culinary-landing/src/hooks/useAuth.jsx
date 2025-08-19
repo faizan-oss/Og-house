@@ -32,52 +32,64 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
+    console.log('[useAuth] Login attempt started for:', email);
     setIsLoading(true);
     try {
       const res = await authAPI.login({ email, password });
+      console.log('[useAuth] API response received:', res);
 
       // ✅ Check for actual token + user
       if (res?.data?.token && res?.data?.user) {
+        console.log('[useAuth] ✅ Login successful - token and user found');
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('user', JSON.stringify(res.data.user));
         setUser(res.data.user);
 
         toast.success('Login successful!');
-        navigate('/'); // redirect home
+        console.log('[useAuth] Navigating to homepage...');
+        navigate('/'); // redirect home only on successful login
         return true;
       }
 
-      toast.error('Login failed: token/user missing');
+      console.log('[useAuth] ❌ Login failed: missing token or user in response');
+      console.log('[useAuth] Response data:', res?.data);
+      // If no token/user in response, treat as login failure
       return false;
     } catch (error) {
-      console.error('[Auth] Login error:', error);
-      toast.error(error.response?.data?.message || 'Login failed');
-      return false;
+      console.error('[useAuth] ❌ Login error caught:', error);
+      console.error('[useAuth] Error response:', error.response);
+      console.error('[useAuth] Error status:', error.response?.status);
+      console.error('[useAuth] Error message:', error.message);
+      
+      // Re-throw the error so the form can handle it appropriately
+      // Don't navigate on error - let the form handle it
+      throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
   const register = async (name, email, password) => {
-  setIsLoading(true);
-  try {
-    const res = await authAPI.register({ name, email, password });
+    setIsLoading(true);
+    try {
+      const res = await authAPI.register({ name, email, password });
 
-    if (res?.data?.token && res?.data?.user) {
-      toast.success('Registration successful!');
-      return res.data; // ✅ return user + token + message
+      if (res?.data?.token && res?.data?.user) {
+        toast.success('Registration successful!');
+        return res.data; // ✅ return user + token + message
+      }
+
+      // If no token/user in response, treat as registration failure
+      return null;
+    } catch (error) {
+      console.error('[Auth] Registration error:', error);
+      
+      // Re-throw the error so the form can handle it appropriately
+      throw error;
+    } finally {
+      setIsLoading(false);
     }
-
-    toast.error('Registration failed');
-    return null;
-  } catch (error) {
-    console.error('[Auth] Registration error:', error);
-    toast.error(error.response?.data?.message || 'Registration failed');
-    return null;
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
 
   const logout = () => {

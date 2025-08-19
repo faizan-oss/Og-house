@@ -28,7 +28,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Only redirect on 401 if it's not from login/register attempts
+    // This prevents unwanted navigation during failed authentication
+    if (error.response?.status === 401 && 
+        !error.config?.url?.includes('/auth/login') && 
+        !error.config?.url?.includes('/auth/register')) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/';
@@ -99,6 +103,7 @@ export const orderAPI = {
   getAllOrders: () => api.get('/orders'),
   getOrdersByStatus: (status) => api.get(`/orders/by-status?status=${status}`),
   updateOrderTracking: (id, trackingData) => api.patch(`/orders/${id}`, trackingData),
+  deleteOrder: (id) => api.delete(`/orders/${id}`),
 };
 
 // Notification API - using your actual notification service

@@ -22,22 +22,22 @@ const About = () => {
   ];
 
   return (
-    <section className="py-16 lg:py-24 bg-background">
+    <section className="py-12 sm:py-16 lg:py-24 bg-background">
       <div className="container mx-auto px-4 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           {/* About Content */}
-          <div className="space-y-8">
-            <div className="space-y-6">
-              <h2 className="text-3xl lg:text-5xl font-bold text-foreground">
+          <div className="space-y-6 sm:space-y-8 text-center lg:text-left">
+            <div className="space-y-4 sm:space-y-6">
+              <h2 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-foreground">
                 The Story Behind
                 <span className="block text-primary">The OG House</span>
               </h2>
-              <p className="text-lg text-muted-foreground leading-relaxed">
+              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
                 Founded with a simple mission: to elevate American comfort food to new heights. 
                 Our kitchen combines traditional techniques with innovative flavors, creating dishes 
                 that honor the past while embracing the future.
               </p>
-              <p className="text-lg text-muted-foreground leading-relaxed">
+              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
                 From our signature burgers to our carefully crafted sides, every item on our menu 
                 tells a story of dedication, quality, and the pursuit of culinary excellence.
               </p>
@@ -49,21 +49,21 @@ const About = () => {
           </div>
 
           {/* Values Grid */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {values.map((value, index) => (
               <Card 
                 key={index}
                 className="border-2 border-primary/10 bg-card hover:border-primary/30 transition-all duration-300 hover:shadow-card"
                 style={{ animationDelay: `${index * 0.2}s` }}
               >
-                <CardContent className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="bg-primary/10 p-3 rounded-2xl flex-shrink-0">
-                      <value.icon className="h-6 w-6 text-primary" />
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-start space-x-3 sm:space-x-4">
+                    <div className="bg-primary/10 p-2 sm:p-3 rounded-2xl flex-shrink-0">
+                      <value.icon className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                     </div>
                     <div className="space-y-2">
-                      <h3 className="font-bold text-lg text-foreground">{value.title}</h3>
-                      <p className="text-muted-foreground leading-relaxed">{value.description}</p>
+                      <h3 className="font-bold text-base sm:text-lg text-foreground">{value.title}</h3>
+                      <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{value.description}</p>
                     </div>
                   </div>
                 </CardContent>

@@ -161,24 +161,43 @@ const AdminPage = () => {
     }
   };
 
+  const handleDeleteOrder = async (orderId) => {
+    if (window.confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+      try {
+        await orderAPI.deleteOrder(orderId);
+        toast.success('Order deleted successfully');
+        fetchData();
+      } catch (error) {
+        console.error('Delete order error:', error);
+        toast.error('Failed to delete order');
+      }
+    }
+  };
+
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'pending': return <Clock className="h-4 w-4 text-yellow-500" />;
-      case 'accepted': return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'on-the-way': return <Truck className="h-4 w-4 text-blue-500" />;
-      case 'completed': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'cancelled': return <XCircle className="h-4 w-4 text-red-500" />;
+      case 'Pending': return <Clock className="h-4 w-4 text-yellow-500" />;
+      case 'Accepted': return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'Preparing': return <Clock className="h-4 w-4 text-orange-500" />;
+      case 'Ready for Pickup': return <Package className="h-4 w-4 text-purple-500" />;
+      case 'On The Way': return <Truck className="h-4 w-4 text-blue-500" />;
+      case 'Completed': return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case 'Delivered': return <CheckCircle className="h-4 w-4 text-green-700" />;
+      case 'Cancelled': return <XCircle className="h-4 w-4 text-red-500" />;
       default: return <Clock className="h-4 w-4" />;
     }
   };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'accepted': return 'bg-green-100 text-green-800';
-      case 'on-the-way': return 'bg-blue-100 text-blue-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
+      case 'Pending': return 'bg-yellow-100 text-yellow-800';
+      case 'Accepted': return 'bg-green-100 text-green-800';
+      case 'Preparing': return 'bg-orange-100 text-orange-800';
+      case 'Ready for Pickup': return 'bg-purple-100 text-purple-800';
+      case 'On The Way': return 'bg-blue-100 text-blue-800';
+      case 'Completed': return 'bg-green-100 text-green-800';
+      case 'Delivered': return 'bg-green-100 text-green-800';
+      case 'Cancelled': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -209,7 +228,7 @@ const AdminPage = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="foods">Food Management</TabsTrigger>
           <TabsTrigger value="orders">Orders</TabsTrigger>
@@ -217,7 +236,7 @@ const AdminPage = () => {
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
@@ -271,7 +290,7 @@ const AdminPage = () => {
             </Card>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             <Card>
               <CardHeader>
                 <CardTitle>Recent Orders</CardTitle>
@@ -466,7 +485,7 @@ const AdminPage = () => {
             </Card>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {foods?.map((food) => (
               <Card key={food._id}>
                 <div className="relative">
@@ -529,7 +548,17 @@ const AdminPage = () => {
                 <CardContent className="p-6">
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <h3 className="font-bold text-lg">Order #{order._id.slice(-6)}</h3>
+                      <div className="flex items-center space-x-3 mb-2">
+                        <h3 className="font-bold text-lg">Order #{order._id.slice(-6)}</h3>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteOrder(order._id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                       <p className="text-muted-foreground">
                         {new Date(order.createdAt).toLocaleDateString()}
                       </p>
@@ -544,22 +573,46 @@ const AdminPage = () => {
                     <div>
                       <p className="font-medium">Customer Details</p>
                       <p className="text-sm text-muted-foreground">
-                        {order.customerName} - {order.deliveryDetails?.phone}
+                        <strong>Name:</strong> {order.customerName}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        <strong>Email:</strong> {order.email || 'Not provided'}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        <strong>Phone:</strong> {order.deliveryDetails?.phone || 'Not provided'}
                       </p>
                       {order.deliveryDetails?.address && (
                         <p className="text-sm text-muted-foreground">
-                          {order.deliveryDetails.address}
+                          <strong>Address:</strong> {order.deliveryDetails.address}
+                        </p>
+                      )}
+                      {order.deliveryDetails?.city && (
+                        <p className="text-sm text-muted-foreground">
+                          <strong>City:</strong> {order.deliveryDetails.city}
+                        </p>
+                      )}
+                      {order.deliveryDetails?.pincode && (
+                        <p className="text-sm text-muted-foreground">
+                          <strong>Pincode:</strong> {order.deliveryDetails.pincode}
                         </p>
                       )}
                     </div>
                     <div>
                       <p className="font-medium">Order Details</p>
                       <p className="text-sm text-muted-foreground">
-                        {order.orderType} - {order.paymentMethod}
+                        <strong>Type:</strong> {order.orderType}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        Total: ₹{order.totalAmount}
+                        <strong>Payment:</strong> {order.paymentMethod}
                       </p>
+                      <p className="text-sm text-muted-foreground">
+                        <strong>Total:</strong> ₹{order.totalAmount}
+                      </p>
+                      {order.specialInstructions && (
+                        <p className="text-sm text-muted-foreground">
+                          <strong>Special Instructions:</strong> {order.specialInstructions}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -581,32 +634,40 @@ const AdminPage = () => {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => updateOrderStatus(order._id, 'accepted')}
-                      disabled={order.status === 'accepted'}
+                      onClick={() => updateOrderStatus(order._id, 'Accepted')}
+                      disabled={order.status === 'Accepted'}
                     >
                       Accept Order
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => updateOrderStatus(order._id, 'on-the-way')}
-                      disabled={order.status === 'on-the-way'}
+                      onClick={() => updateOrderStatus(order._id, 'Preparing')}
+                      disabled={order.status === 'Preparing'}
+                    >
+                      Mark Preparing
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => updateOrderStatus(order._id, 'On The Way')}
+                      disabled={order.status === 'On The Way'}
                     >
                       Mark On The Way
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => updateOrderStatus(order._id, 'completed')}
-                      disabled={order.status === 'completed'}
+                      onClick={() => updateOrderStatus(order._id, 'Completed')}
+                      disabled={order.status === 'Completed'}
                     >
                       Mark Completed
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => updateOrderStatus(order._id, 'cancelled')}
-                      disabled={order.status === 'cancelled'}
+                      onClick={() => updateOrderStatus(order._id, 'Cancelled')}
+                      disabled={order.status === 'Cancelled'}
                     >
                       Cancel Order
                     </Button>
@@ -633,3 +694,4 @@ const AdminPage = () => {
 };
 
 export default AdminPage;
+
