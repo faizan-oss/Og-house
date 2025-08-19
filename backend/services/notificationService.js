@@ -44,11 +44,20 @@ function getIO() {
 function notifyAdminNewOrder(order) {
   try {
     console.log('🔔 [NotificationService] Attempting to notify admin about new order:', order._id);
+    console.log('🔔 [NotificationService] Order details:', {
+      orderId: order._id,
+      customerName: order.customerName,
+      totalAmount: order.totalAmount,
+      status: order.status
+    });
+    
     const io = getIO();
     console.log('🔔 [NotificationService] Socket.IO instance obtained:', !!io);
+    console.log('🔔 [NotificationService] All connected sockets:', io.sockets.sockets.size);
     console.log('🔔 [NotificationService] Admin room exists:', !!io.sockets.adapter.rooms.get('admin-room'));
+    console.log('🔔 [NotificationService] All rooms:', Array.from(io.sockets.adapter.rooms.keys()));
     
-    io.to('admin-room').emit('new-order', {
+    const notificationData = {
       type: 'new-order',
       order: {
         id: order._id,
@@ -60,10 +69,24 @@ function notifyAdminNewOrder(order) {
       },
       message: `New order placed by ${order.customerName} for ₹${order.totalAmount}`,
       timestamp: new Date()
-    });
+    };
+    
+    console.log('🔔 [NotificationService] Sending admin notification data:', notificationData);
+    
+    io.to('admin-room').emit('new-order', notificationData);
+    
     console.log(`✅ [NotificationService] Admin notification sent: New order from ${order.customerName}`);
+    
+    // Also emit to all sockets for debugging
+    io.emit('debug-notification', {
+      type: 'debug',
+      message: `Admin notification sent: New order from ${order.customerName}`,
+      timestamp: new Date()
+    });
+    
   } catch (error) {
     console.error('❌ [NotificationService] Error in notifyAdminNewOrder:', error);
+    console.error('❌ [NotificationService] Error stack:', error.stack);
   }
 }
 
@@ -71,9 +94,18 @@ function notifyAdminNewOrder(order) {
 function notifyUserOrderStatusChange(userId, order, newStatus) {
   try {
     console.log(`🔔 [NotificationService] Attempting to notify user ${userId} about status change to ${newStatus}`);
+    console.log(`🔔 [NotificationService] Order details:`, {
+      orderId: order._id,
+      customerName: order.customerName,
+      oldStatus: order.status,
+      newStatus: newStatus
+    });
+    
     const io = getIO();
     console.log('🔔 [NotificationService] Socket.IO instance obtained:', !!io);
+    console.log('🔔 [NotificationService] All connected sockets:', io.sockets.sockets.size);
     console.log(`🔔 [NotificationService] User room exists:`, !!io.sockets.adapter.rooms.get(`user-${userId}`));
+    console.log(`🔔 [NotificationService] All rooms:`, Array.from(io.sockets.adapter.rooms.keys()));
     
     const statusMessages = {
       'Accepted': 'Your order has been accepted and is being prepared!',
@@ -82,19 +114,33 @@ function notifyUserOrderStatusChange(userId, order, newStatus) {
       'Delivered': 'Your order has been delivered. Enjoy your meal!',
       'Cancelled': 'Your order has been cancelled.'
     };
-
+    
     const message = statusMessages[newStatus] || `Order status updated to ${newStatus}`;
     
-    io.to(`user-${userId}`).emit('order-status-update', {
+    const notificationData = {
       type: 'order-status-update',
       orderId: order._id,
       status: newStatus,
       message: message,
       timestamp: new Date()
-    });
+    };
+    
+    console.log(`🔔 [NotificationService] Sending notification data:`, notificationData);
+    
+    io.to(`user-${userId}`).emit('order-status-update', notificationData);
+    
     console.log(`✅ [NotificationService] User notification sent: ${message} (User: ${userId})`);
+    
+    // Also emit to all sockets for debugging
+    io.emit('debug-notification', {
+      type: 'debug',
+      message: `Notification sent to user ${userId}: ${message}`,
+      timestamp: new Date()
+    });
+    
   } catch (error) {
     console.error('❌ [NotificationService] Error in notifyUserOrderStatusChange:', error);
+    console.error('❌ [NotificationService] Error stack:', error.stack);
   }
 }
 

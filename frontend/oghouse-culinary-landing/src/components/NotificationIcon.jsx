@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +15,7 @@ const NotificationIcon = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!user) return;
@@ -50,9 +52,16 @@ const NotificationIcon = () => {
         setNotifications(prev => [newNotification, ...prev.slice(0, 19)]); // Keep last 20
         setUnreadCount(prev => prev + 1);
         
-        // Show toast notification
+        // Show toast notification with action button
         toast.success('New order received!', {
-          description: data.message
+          description: data.message,
+          action: {
+            label: 'View Order',
+            onClick: () => {
+              navigate('/admin');
+              setIsOpen(false);
+            }
+          }
         });
       });
     }
@@ -63,7 +72,7 @@ const NotificationIcon = () => {
         console.log('🔔 [NotificationIcon] Order status notification received:', data);
         const newNotification = {
           _id: Date.now().toString(),
-          type: data.type,
+          type: 'order_status_update',
           title: `Order ${data.status}`,
           message: data.message,
           createdAt: data.timestamp,
@@ -74,12 +83,24 @@ const NotificationIcon = () => {
         setNotifications(prev => [newNotification, ...prev.slice(0, 19)]); // Keep last 20
         setUnreadCount(prev => prev + 1);
         
-        // Show toast notification
+        // Show toast notification with action button
         toast.info('Order Update', {
-          description: data.message
+          description: data.message,
+          action: {
+            label: 'View Order',
+            onClick: () => {
+              navigate('/my-orders');
+              setIsOpen(false);
+            }
+          }
         });
       });
     }
+
+    // Debug notifications (for troubleshooting)
+    socket.on('debug-notification', (data) => {
+      console.log('🔔 [NotificationIcon] Debug notification received:', data);
+    });
 
     // Socket connection events
     socket.on('connect', () => {
@@ -98,7 +119,7 @@ const NotificationIcon = () => {
       console.log('🔔 [NotificationIcon] Cleaning up socket connection');
       socket.disconnect();
     };
-  }, [user]);
+  }, [user, navigate]);
 
   const markAsRead = (id) => {
     setNotifications(prev => 
@@ -111,6 +132,27 @@ const NotificationIcon = () => {
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
     setUnreadCount(0);
     toast.success('All notifications marked as read');
+  };
+
+  const handleNotificationClick = (notification) => {
+    // Mark as read
+    markAsRead(notification._id);
+    
+    // Navigate based on notification type and user role
+    if (user.role === 'admin') {
+      if (notification.type === 'order_placed') {
+        // Admin clicks on new order notification -> go to admin dashboard
+        navigate('/admin');
+      }
+    } else {
+      if (notification.type === 'order_status_update') {
+        // User clicks on order status update -> go to my orders
+        navigate('/my-orders');
+      }
+    }
+    
+    // Close notification panel
+    setIsOpen(false);
   };
 
   const getNotificationIcon = (type) => {
@@ -191,7 +233,7 @@ const NotificationIcon = () => {
                           className={`p-4 hover:bg-gray-50 cursor-pointer ${
                             !notification.isRead ? 'bg-blue-50' : ''
                           }`}
-                          onClick={() => markAsRead(notification._id)}
+                          onClick={() => handleNotificationClick(notification)}
                         >
                           <div className="flex items-start space-x-3">
                             <span className="text-lg">

@@ -128,7 +128,7 @@ function buildOrderEmailHtml(order) {
       <div style="background:#f8fafc;padding:25px;border-bottom:1px solid #e2e8f0;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
           <h2 style="margin:0;color:#1e293b;font-size:20px;font-weight:600;">Order #${String(order._id).slice(-8).toUpperCase()}</h2>
-          <span style="background:#10b981;color:white;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">${order.status || 'Pending'}</span>
+          <span style="margin-left:10px;background:#10b981;color:white;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">${order.status || 'Pending'}</span>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;color:#64748b;font-size:13px;">
           <div><strong style="color:#374151;">${order.orderType || 'Delivery'}</strong> • ${order.paymentMethod || 'Cash on Delivery'}</div>
@@ -220,7 +220,7 @@ function buildOrderEmailHtml(order) {
             <div style="background:#ffffff;padding:20px;border-top:1px solid #e2e8f0;">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
                 <span style="color:#6b7280;font-size:14px;">Subtotal</span>
-                <span style="color:#111827;font-weight:600;font-size:16px;">${formatCurrency(subtotal)}</span>
+                <span style="margin-left: 10px;color:#111827;font-weight:600;font-size:16px;">${formatCurrency(subtotal)}</span>
               </div>
               
               ${deliveryFee > 0 ? `
@@ -232,8 +232,8 @@ function buildOrderEmailHtml(order) {
               
               <div style="border-top:2px solid #e2e8f0;padding-top:15px;margin-top:15px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;">
-                  <span style="color:#111827;font-weight:700;font-size:18px;">TOTAL</span>
-                  <span style="background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%);color:#ffffff;padding:8px 20px;border-radius:25px;font-weight:700;font-size:18px;">${formatCurrency(finalAmount)}</span>
+                  <span style="margin-top:10px;color:#111827;font-weight:700;font-size:18px;">TOTAL</span>
+                  <span style="margin-left: 10px;background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%);color:#ffffff;padding:8px 20px;border-radius:25px;font-weight:700;font-size:18px;">${formatCurrency(finalAmount)}</span>
                 </div>
               </div>
             </div>

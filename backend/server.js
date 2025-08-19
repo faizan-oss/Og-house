@@ -85,6 +85,39 @@ app.get("/api/test-gmail", async (req, res) => {
   }
 });
 
+// Test notification endpoint
+app.get("/api/test-notification", async (req, res) => {
+  try {
+    const { notifyAdminNewOrder, notifyUserOrderStatusChange } = require('./services/notificationService');
+    
+    // Test admin notification
+    const testOrder = {
+      _id: "test_order_123",
+      customerName: "Test Customer",
+      totalAmount: 500,
+      status: "Pending",
+      createdAt: new Date(),
+      items: [
+        { food: { name: "Test Pizza", price: 500 } }
+      ]
+    };
+    
+    notifyAdminNewOrder(testOrder);
+    
+    // Test user notification
+    setTimeout(() => {
+      notifyUserOrderStatusChange("test_user_123", testOrder, "Accepted");
+    }, 1000);
+    
+    res.json({ 
+      message: "Test notifications sent! Check console and connected clients.",
+      testOrder: testOrder
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected successfully"))

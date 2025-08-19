@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { orderAPI } from '@/lib/api';
 import { toast } from 'sonner';
@@ -7,12 +8,13 @@ import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, MapPin, Phone, Mail, Package, CheckCircle, XCircle, Truck, Loader2 } from 'lucide-react';
+import { Clock, MapPin, Package, Eye, Calendar, Receipt } from 'lucide-react';
 
 const MyOrdersPage = () => {
   const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
@@ -37,43 +39,43 @@ const MyOrdersPage = () => {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'Pending':
-        return <Clock className="h-4 w-4" />;
+        return <Clock className="h-4 w-4 text-yellow-500" />;
       case 'Accepted':
-        return <Loader2 className="h-4 w-4" />;
+        return <Receipt className="h-4 w-4 text-blue-500" />;
       case 'Preparing':
-        return <Package className="h-4 w-4" />;
+        return <Package className="h-4 w-4 text-orange-500" />;
       case 'On The Way':
-        return <Truck className="h-4 w-4" />;
+        return <MapPin className="h-4 w-4 text-purple-500" />;
       case 'Delivered':
-        return <CheckCircle className="h-4 w-4" />;
+        return <Package className="h-4 w-4 text-green-500" />;
       case 'Cancelled':
-        return <XCircle className="h-4 w-4" />;
+        return <Package className="h-4 w-4 text-red-500" />;
       default:
-        return <Clock className="h-4 w-4" />;
+        return <Package className="h-4 w-4 text-gray-500" />;
     }
   };
 
   const getStatusColor = (status) => {
     switch (status) {
       case 'Pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'Accepted':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'Preparing':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-orange-100 text-orange-800 border-orange-200';
       case 'On The Way':
-        return 'bg-orange-100 text-orange-800';
+        return 'bg-purple-100 text-purple-800 border-purple-200';
       case 'Delivered':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800 border-green-200';
       case 'Cancelled':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800 border-red-200';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-IN', {
+    return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -89,14 +91,28 @@ const MyOrdersPage = () => {
     }).format(amount);
   };
 
+  const getOrderSummary = (order) => {
+    const itemCount = order.items?.length || 0;
+    const firstItem = order.items?.[0]?.food?.name || 'Item';
+    
+    if (itemCount === 1) {
+      return firstItem;
+    } else if (itemCount === 2) {
+      const secondItem = order.items?.[1]?.food?.name || 'Item';
+      return `${firstItem} + ${secondItem}`;
+    } else {
+      return `${firstItem} + ${itemCount - 1} more items`;
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center min-h-[400px]">
+          <div className="max-w-4xl mx-auto">
             <div className="text-center">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
               <p className="text-muted-foreground">Loading your orders...</p>
             </div>
           </div>
@@ -111,7 +127,20 @@ const MyOrdersPage = () => {
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6">My Orders</h1>
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">My Orders</h1>
+              <p className="text-muted-foreground mt-2">
+                Track your order history and current orders
+              </p>
+            </div>
+            <Button 
+              onClick={() => navigate('/menu')}
+              className="bg-primary hover:bg-primary/90"
+            >
+              Order More Food
+            </Button>
+          </div>
           
           {orders.length === 0 ? (
             <Card>
@@ -121,143 +150,78 @@ const MyOrdersPage = () => {
                 <p className="text-muted-foreground mb-4">
                   You haven't placed any orders yet. Start exploring our menu!
                 </p>
-                <Button onClick={() => window.location.href = '/menu'}>
+                <Button onClick={() => navigate('/menu')}>
                   Browse Menu
                 </Button>
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-4">
               {orders.map((order) => (
-                <Card key={order._id} className="overflow-hidden">
-                  <CardHeader className="bg-muted/50 pb-4">
+                <Card key={order._id} className="hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-4">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                      <div>
-                        <CardTitle className="text-lg">
-                          Order #{String(order._id).slice(-8).toUpperCase()}
-                        </CardTitle>
-                        <p className="text-sm text-muted-foreground">
-                          Placed on {formatDate(order.createdAt)}
-                        </p>
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                          {getStatusIcon(order.status)}
+                          <Badge className={getStatusColor(order.status)}>
+                            {order.status}
+                          </Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          <Calendar className="h-3 w-3 inline mr-1" />
+                          {formatDate(order.createdAt)}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {getStatusIcon(order.status)}
-                        <Badge className={getStatusColor(order.status)}>
-                          {order.status}
-                        </Badge>
+                      <div className="text-right">
+                        <p className="text-sm text-muted-foreground">Order ID</p>
+                        <p className="font-mono text-sm font-medium">
+                          #{String(order._id).slice(-8).toUpperCase()}
+                        </p>
                       </div>
                     </div>
                   </CardHeader>
                   
-                  <CardContent className="p-6">
-                    {/* Order Items */}
-                    <div className="mb-6">
-                      <h4 className="font-semibold mb-3">Order Items</h4>
-                      <div className="space-y-3">
-                        {order.items?.map((item, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <img 
-                                src={item.food?.image} 
-                                alt={item.food?.name}
-                                className="w-12 h-12 object-cover rounded-lg"
-                              />
-                              <div>
-                                <p className="font-medium">{item.food?.name}</p>
-                                <p className="text-sm text-muted-foreground">
-                                  Qty: {item.quantity} × {formatCurrency(item.food?.price)}
-                                </p>
-                              </div>
-                            </div>
-                            <p className="font-semibold">
-                              {formatCurrency(item.total || (item.food?.price * item.quantity))}
-                            </p>
-                          </div>
-                        ))}
+                  <CardContent className="pt-0">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Order Summary</p>
+                        <p className="font-medium">{getOrderSummary(order)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Total Amount</p>
+                        <p className="font-semibold text-lg text-primary">
+                          {formatCurrency(order.totalAmount)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Order Type</p>
+                        <p className="font-medium capitalize">
+                          {order.orderType || 'Delivery'}
+                        </p>
                       </div>
                     </div>
 
-                    {/* Order Details */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                      {/* Customer Details */}
-                      <div>
-                        <h4 className="font-semibold mb-3 flex items-center gap-2">
-                          <Package className="h-4 w-4" />
-                          Order Details
-                        </h4>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground">Type:</span>
-                            <span className="font-medium">{order.orderType || 'Delivery'}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground">Payment:</span>
-                            <span className="font-medium">{order.paymentMethod || 'Cash on Delivery'}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground">Total:</span>
-                            <span className="font-semibold text-lg">{formatCurrency(order.totalAmount)}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Delivery Details */}
-                      {order.orderType !== 'pickup' && (
-                        <div>
-                          <h4 className="font-semibold mb-3 flex items-center gap-2">
-                            <MapPin className="h-4 w-4" />
-                            Delivery Details
-                          </h4>
-                          <div className="space-y-2 text-sm">
-                            <div className="flex items-center gap-2">
-                              <span className="text-muted-foreground">Address:</span>
-                              <span className="font-medium">{order.deliveryDetails?.address || 'N/A'}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-muted-foreground">City:</span>
-                              <span className="font-medium">{order.deliveryDetails?.city || 'N/A'}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-muted-foreground">Pincode:</span>
-                              <span className="font-medium">{order.deliveryDetails?.pincode || 'N/A'}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-muted-foreground">Phone:</span>
-                              <span className="font-medium">{order.deliveryDetails?.phone || order.phone || 'N/A'}</span>
-                            </div>
-                          </div>
-                        </div>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Button
+                        variant="outline"
+                        onClick={() => navigate(`/orders/${order._id}`)}
+                        className="flex-1 sm:flex-none"
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Details
+                      </Button>
+                      
+                      {order.status === 'Delivered' && (
+                        <Button
+                          variant="outline"
+                          onClick={() => navigate('/menu')}
+                          className="flex-1 sm:flex-none"
+                        >
+                          Order Again
+                        </Button>
                       )}
                     </div>
-
-                    {/* Special Instructions */}
-                    {order.specialInstructions && (
-                      <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                        <h4 className="font-semibold mb-2 text-amber-800">Special Instructions</h4>
-                        <p className="text-amber-700 italic">"{order.specialInstructions}"</p>
-                      </div>
-                    )}
-
-                    {/* Status History */}
-                    {order.statusHistory && order.statusHistory.length > 0 && (
-                      <div>
-                        <h4 className="font-semibold mb-3">Order Progress</h4>
-                        <div className="space-y-2">
-                          {order.statusHistory.map((status, index) => (
-                            <div key={index} className="flex items-center gap-3 text-sm">
-                              <div className="w-2 h-2 bg-primary rounded-full"></div>
-                              <span className="font-medium">{status.status}</span>
-                              <span className="text-muted-foreground">
-                                {formatDate(status.timestamp)}
-                              </span>
-                              {status.notes && (
-                                <span className="text-muted-foreground italic">- {status.notes}</span>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
               ))}
