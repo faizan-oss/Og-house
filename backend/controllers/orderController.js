@@ -222,26 +222,10 @@ exports.updateOrderStatus = async (req, res) => {
         // Notify user about status change
         if (status && status !== oldStatus && order.userId) {
             console.log(`🔔 [OrderController] Status changed from ${oldStatus} to ${status}, notifying user ${order.userId}`);
-            console.log(`🔔 [OrderController] Order userId type: ${typeof order.userId}, value: ${order.userId}`);
-            console.log(`🔔 [OrderController] Order userId toString: ${order.userId.toString()}`);
-            console.log(`🔔 [OrderController] Order full details:`, {
-                orderId: order._id,
-                userId: order.userId,
-                userIdType: typeof order.userId,
-                customerName: order.customerName,
-                status: status
-            });
-            
             notifyUserOrderStatusChange(order.userId.toString(), order, status);
             console.log(`✅ [OrderController] User notification sent for status change to ${status}`);
         } else {
             console.log(`⚠️ [OrderController] No notification sent - status: ${status}, oldStatus: ${oldStatus}, userId: ${order.userId}`);
-            console.log(`⚠️ [OrderController] Order details for debugging:`, {
-                orderId: order._id,
-                userId: order.userId,
-                hasUserId: !!order.userId,
-                statusChanged: status !== oldStatus
-            });
         }
 
         res.json({
@@ -283,7 +267,6 @@ exports.markOrderDelivered = async (req, res) => {
         // Notify user
         if (order.userId) {
             console.log(`🔔 [OrderController] Marking order delivered, notifying user ${order.userId}`);
-            console.log(`🔔 [OrderController] Order userId type: ${typeof order.userId}, value: ${order.userId}`);
             notifyUserOrderStatusChange(order.userId.toString(), order, 'Delivered');
             console.log(`✅ [OrderController] User notification sent for delivery`);
         } else {
