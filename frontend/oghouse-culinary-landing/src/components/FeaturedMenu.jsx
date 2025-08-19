@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Star, Leaf, Eye } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Leaf, Star, Plus, Eye } from 'lucide-react';
 import { foodAPI } from '@/lib/api.js';
 import { useCart } from '@/hooks/useCart.js';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 const FeaturedMenu = () => {
   const [featuredFoods, setFeaturedFoods] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const { addToCart } = useCart();
+  const { isAuthenticated, openAuthDialog } = useAuth();
   const navigate = useNavigate();
 
   // Function to truncate description and check if truncation is needed
@@ -132,6 +134,11 @@ const FeaturedMenu = () => {
   };
 
   const handleAddToCart = async (food) => {
+    if (!isAuthenticated) {
+      toast.info('Please log in to add items to your cart.');
+      openAuthDialog('login');
+      return;
+    }
     try {
       await addToCart(food._id);
       toast.success(`${food.name} added to cart!`);

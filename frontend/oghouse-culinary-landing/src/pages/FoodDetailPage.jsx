@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { foodAPI } from '@/lib/api.js';
 import { useCart } from '@/hooks/useCart.js';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -15,6 +16,7 @@ const FoodDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { isAuthenticated, openAuthDialog } = useAuth();
   
   const [food, setFood] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -48,6 +50,11 @@ const FoodDetailPage = () => {
   };
 
   const handleAddToCart = async () => {
+    if (!isAuthenticated) {
+      toast.info('Please log in to add items to your cart.');
+      openAuthDialog('login');
+      return;
+    }
     try {
       setAddingToCart(true);
       await addToCart(food._id, quantity);

@@ -15,16 +15,14 @@ import NotificationIcon from "@/components/NotificationIcon";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const Navbar = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showAuth, setShowAuth] = useState(false);
-  const [authMode, setAuthMode] = useState("login");
+  const { user, isAuthenticated, logout, openAuthDialog, closeAuthDialog, showAuthDialog, authMode } = useAuth();
+  const { totalItems } = useCart();
+  const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-  const [showSearchResults, setShowSearchResults] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const searchRef = useRef(null);
-  const { user, logout, isAuthenticated } = useAuth();
-  const { totalItems } = useCart();
   const navigate = useNavigate();
 
   // Debounced search
@@ -280,8 +278,7 @@ const Navbar = () => {
               <Button
                 variant="ghost"
                 onClick={() => {
-                  setAuthMode("login");
-                  setShowAuth(true);
+                  openAuthDialog("login");
                 }}
                 className="text-foreground hover:text-primary font-medium text-sm px-4 py-2 rounded-full"
               >
@@ -438,8 +435,7 @@ const Navbar = () => {
                 <Button
                   variant="ghost"
                   onClick={() => {
-                    setAuthMode("login");
-                    setShowAuth(true);
+                    openAuthDialog("login");
                     closeMobileMenu();
                   }}
                   className="w-full justify-start px-4 py-3 text-foreground hover:text-primary hover:bg-muted/50 rounded-lg"
@@ -487,7 +483,7 @@ const Navbar = () => {
       </div>
 
       {/* Auth Dialog */}
-      <Dialog open={showAuth} onOpenChange={setShowAuth}>
+      <Dialog open={showAuthDialog} onOpenChange={closeAuthDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogTitle className="sr-only">Authentication</DialogTitle>
           <DialogDescription className="sr-only">
@@ -496,17 +492,17 @@ const Navbar = () => {
 
           {authMode === "login" ? (
             <LoginForm
-              onSwitchToRegister={() => setAuthMode("register")}
+              onSwitchToRegister={() => openAuthDialog("register")}
               onSuccess={() => {
                 // Only close dialog on successful login
                 // Failed login attempts will keep the dialog open
                 console.log('[Navbar] ✅ Login successful, closing auth dialog');
-                setShowAuth(false);
+                closeAuthDialog();
               }}
             />
           ) : (
             <RegisterForm
-              onSwitchToLogin={() => setAuthMode("login")} // switch after success
+              onSwitchToLogin={() => openAuthDialog("login")} // switch after success
             />
           )}
         </DialogContent>

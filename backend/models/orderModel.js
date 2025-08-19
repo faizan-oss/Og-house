@@ -28,6 +28,14 @@ const deliveryDetailsSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  city: {
+    type: String,
+    required: false
+  },
+  pincode: {
+    type: String,
+    required: false
+  },
   phone: {
     type: String,
     required: false
@@ -107,6 +115,14 @@ const orderSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: false // Optional for guest orders
+  },
+  email: {
+    type: String,
+    required: false
+  },
+  phone: {
+    type: String,
+    required: false
   },
   items: [
     {

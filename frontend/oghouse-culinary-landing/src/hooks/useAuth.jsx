@@ -8,6 +8,8 @@ const AuthContext = createContext(undefined);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [authMode, setAuthMode] = useState('login');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -100,9 +102,29 @@ export const AuthProvider = ({ children }) => {
     navigate('/');
   };
 
+  const openAuthDialog = (mode = 'login') => {
+    setAuthMode(mode);
+    setShowAuthDialog(true);
+  };
+
+  const closeAuthDialog = () => {
+    setShowAuthDialog(false);
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, login, register, logout, isAuthenticated: !!user }}
+      value={{ 
+        user, 
+        isLoading, 
+        login, 
+        register, 
+        logout, 
+        isAuthenticated: !!user,
+        showAuthDialog,
+        authMode,
+        openAuthDialog,
+        closeAuthDialog
+      }}
     >
       {children}
     </AuthContext.Provider>

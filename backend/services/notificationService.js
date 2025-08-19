@@ -43,7 +43,11 @@ function getIO() {
 // Notify admins about new order
 function notifyAdminNewOrder(order) {
   try {
+    console.log('🔔 [NotificationService] Attempting to notify admin about new order:', order._id);
     const io = getIO();
+    console.log('🔔 [NotificationService] Socket.IO instance obtained:', !!io);
+    console.log('🔔 [NotificationService] Admin room exists:', !!io.sockets.adapter.rooms.get('admin-room'));
+    
     io.to('admin-room').emit('new-order', {
       type: 'new-order',
       order: {
@@ -54,28 +58,33 @@ function notifyAdminNewOrder(order) {
         createdAt: order.createdAt,
         items: order.items
       },
-      message: `New order placed by ${order.customerName} for $${order.totalAmount}`,
+      message: `New order placed by ${order.customerName} for ₹${order.totalAmount}`,
       timestamp: new Date()
     });
-    console.log(`📢 Admin notification sent: New order from ${order.customerName}`);
+    console.log(`✅ [NotificationService] Admin notification sent: New order from ${order.customerName}`);
   } catch (error) {
-    console.error('Error in notifyAdminNewOrder:', error);
+    console.error('❌ [NotificationService] Error in notifyAdminNewOrder:', error);
   }
 }
 
 // Notify user about order status change
 function notifyUserOrderStatusChange(userId, order, newStatus) {
   try {
+    console.log(`🔔 [NotificationService] Attempting to notify user ${userId} about status change to ${newStatus}`);
+    const io = getIO();
+    console.log('🔔 [NotificationService] Socket.IO instance obtained:', !!io);
+    console.log(`🔔 [NotificationService] User room exists:`, !!io.sockets.adapter.rooms.get(`user-${userId}`));
+    
     const statusMessages = {
       'Accepted': 'Your order has been accepted and is being prepared!',
+      'Preparing': 'Your order is being prepared in the kitchen!',
       'On The Way': 'Your order is on the way!',
-      'Completed': 'Your order has been completed. Enjoy your meal!',
+      'Delivered': 'Your order has been delivered. Enjoy your meal!',
       'Cancelled': 'Your order has been cancelled.'
     };
 
     const message = statusMessages[newStatus] || `Order status updated to ${newStatus}`;
     
-    const io = getIO();
     io.to(`user-${userId}`).emit('order-status-update', {
       type: 'order-status-update',
       orderId: order._id,
@@ -83,9 +92,9 @@ function notifyUserOrderStatusChange(userId, order, newStatus) {
       message: message,
       timestamp: new Date()
     });
-    console.log(`📱 User notification sent: ${message} (User: ${userId})`);
+    console.log(`✅ [NotificationService] User notification sent: ${message} (User: ${userId})`);
   } catch (error) {
-    console.error('Error in notifyUserOrderStatusChange:', error);
+    console.error('❌ [NotificationService] Error in notifyUserOrderStatusChange:', error);
   }
 }
 

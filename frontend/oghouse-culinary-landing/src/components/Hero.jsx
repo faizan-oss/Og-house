@@ -1,8 +1,19 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Clock, Truck } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const Hero = () => {
+  const { isAuthenticated, openAuthDialog } = useAuth();
+
+  const handleOrderNow = () => {
+    if (!isAuthenticated) {
+      openAuthDialog('login');
+    } else {
+      window.location.href = '/menu';
+    }
+  };
+
   return (
     <section className="relative bg-hero-gradient min-h-[500px] sm:min-h-[600px] lg:min-h-[700px] flex items-center">
       <div className="container mx-auto px-4 lg:px-8">
@@ -22,12 +33,14 @@ const Hero = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/menu">
-                <Button size="default" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-3 text-base rounded-full shadow-elegant transition-all duration-300 hover:shadow-xl hover:scale-105 flex items-center justify-center w-full sm:w-auto">
-                  Order Now
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
+              <Button 
+                size="default" 
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-3 text-base rounded-full shadow-elegant transition-all duration-300 hover:shadow-xl hover:scale-105 flex items-center justify-center w-full sm:w-auto"
+                onClick={handleOrderNow}
+              >
+                Order Now
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
               <Button 
                 variant="outline" 
                 size="default" 

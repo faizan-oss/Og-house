@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Star, Leaf, Search, Filter, SortAsc, SortDesc, Eye } from 'lucide-react';
 import { foodAPI } from '@/lib/api.js';
 import { useCart } from '@/hooks/useCart.js';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 const MenuGrid = () => {
@@ -23,6 +24,7 @@ const MenuGrid = () => {
   const [vegFilter, setVegFilter] = useState('all');
   
   const { addToCart } = useCart();
+  const { isAuthenticated, openAuthDialog } = useAuth();
   const navigate = useNavigate();
 
   // Function to truncate description and check if truncation is needed
@@ -190,6 +192,11 @@ const MenuGrid = () => {
   };
 
   const handleAddToCart = async (food) => {
+    if (!isAuthenticated) {
+      toast.info('Please log in to add items to your cart.');
+      openAuthDialog('login');
+      return;
+    }
     try {
       await addToCart(food._id);
       toast.success(`${food.name} added to cart!`);

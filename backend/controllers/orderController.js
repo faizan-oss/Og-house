@@ -72,9 +72,9 @@ exports.createOrderFromCart = async (req, res) => {
             totalAmount: cart.totalAmount,
             deliveryDetails: {
                 address: address || deliveryAddress || 'Not specified',
-                city: city || '',
-                pincode: pincode || '',
-                phone: phone || req.user.phone || ''
+                city: city || 'Not specified',
+                pincode: pincode || 'Not specified',
+                phone: phone || req.user.phone || 'Not specified'
             },
             specialInstructions: specialInstructions || '',
             orderType: orderType,
@@ -86,6 +86,16 @@ exports.createOrderFromCart = async (req, res) => {
             }]
         };
 
+        console.log('📋 Creating order with data:', {
+            customerName: orderData.customerName,
+            email: orderData.email,
+            phone: orderData.phone,
+            city: orderData.deliveryDetails.city,
+            pincode: orderData.deliveryDetails.pincode,
+            address: orderData.deliveryDetails.address,
+            specialInstructions: orderData.specialInstructions
+        });
+
         const order = new Order(orderData);
         await order.save();
 
@@ -96,27 +106,27 @@ exports.createOrderFromCart = async (req, res) => {
 
         // Send notifications
         try {
-            console.log('🔔 Sending notifications for order:', order._id);
+            console.log('🔔 [OrderController] Sending notifications for order:', order._id);
             const populated = await Order.findById(order._id).populate('items.food');
             if (populated) {
-                console.log('📧 Sending email notification...');
-                console.log('📋 Populated order data:', {
+                console.log('📧 [OrderController] Sending email notification...');
+                console.log('📋 [OrderController] Populated order data:', {
                     id: populated._id,
                     idType: typeof populated._id,
                     customerName: populated.customerName,
                     items: populated.items?.length || 0
                 });
                 await sendOrderPlacedEmail(populated);
-                console.log('✅ Email notification sent successfully');
+                console.log('✅ [OrderController] Email notification sent successfully');
                 
-                console.log('📱 Sending real-time notification...');
+                console.log('📱 [OrderController] Sending real-time notification...');
                 notifyAdminNewOrder(populated);
-                console.log('✅ Real-time notification sent successfully');
+                console.log('✅ [OrderController] Real-time notification sent successfully');
             } else {
-                console.log('⚠️ Could not populate order for notifications');
+                console.log('⚠️ [OrderController] Could not populate order for notifications');
             }
         } catch (notificationError) {
-            console.error('❌ Error sending notifications:', notificationError);
+            console.error('❌ [OrderController] Error sending notifications:', notificationError);
         }
 
         res.status(201).json({
@@ -211,7 +221,11 @@ exports.updateOrderStatus = async (req, res) => {
 
         // Notify user about status change
         if (status && status !== oldStatus && order.userId) {
+            console.log(`🔔 [OrderController] Status changed from ${oldStatus} to ${status}, notifying user ${order.userId}`);
             notifyUserOrderStatusChange(order.userId.toString(), order, status);
+            console.log(`✅ [OrderController] User notification sent for status change to ${status}`);
+        } else {
+            console.log(`⚠️ [OrderController] No notification sent - status: ${status}, oldStatus: ${oldStatus}, userId: ${order.userId}`);
         }
 
         res.json({

@@ -579,23 +579,19 @@ const AdminPage = () => {
                         <strong>Email:</strong> {order.email || 'Not provided'}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        <strong>Phone:</strong> {order.deliveryDetails?.phone || 'Not provided'}
+                        <strong>Phone:</strong> {order.phone || order.deliveryDetails?.phone || 'Not provided'}
                       </p>
                       {order.deliveryDetails?.address && (
                         <p className="text-sm text-muted-foreground">
                           <strong>Address:</strong> {order.deliveryDetails.address}
                         </p>
                       )}
-                      {order.deliveryDetails?.city && (
-                        <p className="text-sm text-muted-foreground">
-                          <strong>City:</strong> {order.deliveryDetails.city}
-                        </p>
-                      )}
-                      {order.deliveryDetails?.pincode && (
-                        <p className="text-sm text-muted-foreground">
-                          <strong>Pincode:</strong> {order.deliveryDetails.pincode}
-                        </p>
-                      )}
+                      <p className="text-sm text-muted-foreground">
+                        <strong>City:</strong> {order.deliveryDetails?.city || 'Not specified'}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        <strong>Pincode:</strong> {order.deliveryDetails?.pincode || 'Not specified'}
+                      </p>
                     </div>
                     <div>
                       <p className="font-medium">Order Details</p>
