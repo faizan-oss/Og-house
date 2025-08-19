@@ -20,25 +20,25 @@ const NotificationIcon = () => {
   useEffect(() => {
     if (!user) return;
 
-    console.log('🔔 [NotificationIcon] Setting up notifications for user:', user.id, 'Role:', user.role);
-
     // Connect to Socket.IO server
     const socket = io('https://og-house.onrender.com');
-    console.log('🔔 [NotificationIcon] Socket.IO connection initiated');
 
     // Join appropriate room based on user role
     if (user.role === 'admin') {
+      console.log('🔔 [NotificationIcon] Admin joining admin room');
       socket.emit('join-admin');
-      console.log('🔔 [NotificationIcon] Admin joined notification room');
+      console.log('🔔 [NotificationIcon] Admin join-admin event emitted');
     } else {
-      socket.emit('join-user', user.id);
-      console.log('🔔 [NotificationIcon] User joined notification room:', user.id);
+      socket.emit('join-user', user._id || user.id);
     }
 
     // Listen for admin notifications (new orders)
     if (user.role === 'admin') {
+      console.log('🔔 [NotificationIcon] Setting up admin notification listener');
+      
       socket.on('new-order', (data) => {
-        console.log('🔔 [NotificationIcon] New order notification received:', data);
+        console.log('🔔 [NotificationIcon] Admin notification received:', data);
+        
         const newNotification = {
           _id: Date.now().toString(),
           type: 'order_placed',
@@ -48,6 +48,8 @@ const NotificationIcon = () => {
           isRead: false,
           metadata: data.order
         };
+        
+        console.log('🔔 [NotificationIcon] Created admin notification:', newNotification);
         
         setNotifications(prev => [newNotification, ...prev.slice(0, 19)]); // Keep last 20
         setUnreadCount(prev => prev + 1);
@@ -63,13 +65,14 @@ const NotificationIcon = () => {
             }
           }
         });
+        
+        console.log('🔔 [NotificationIcon] Admin notification processed successfully');
       });
     }
 
     // Listen for user notifications (order status updates)
     if (user.role !== 'admin') {
       socket.on('order-status-update', (data) => {
-        console.log('🔔 [NotificationIcon] Order status notification received:', data);
         const newNotification = {
           _id: Date.now().toString(),
           type: 'order_status_update',
@@ -80,7 +83,7 @@ const NotificationIcon = () => {
           metadata: { orderId: data.orderId, status: data.status }
         };
         
-        setNotifications(prev => [newNotification, ...prev.slice(0, 19)]); // Keep last 20
+        setNotifications(prev => [newNotification, ...prev.slice(0, 19)]);
         setUnreadCount(prev => prev + 1);
         
         // Show toast notification with action button
@@ -97,18 +100,13 @@ const NotificationIcon = () => {
       });
     }
 
-    // Debug notifications (for troubleshooting)
-    socket.on('debug-notification', (data) => {
-      console.log('🔔 [NotificationIcon] Debug notification received:', data);
-    });
-
     // Socket connection events
     socket.on('connect', () => {
-      console.log('🔔 [NotificationIcon] Socket connected:', socket.id);
+      // Socket connected successfully
     });
 
     socket.on('disconnect', () => {
-      console.log('🔔 [NotificationIcon] Socket disconnected');
+      // Socket disconnected
     });
 
     socket.on('connect_error', (error) => {
@@ -116,7 +114,6 @@ const NotificationIcon = () => {
     });
 
     return () => {
-      console.log('🔔 [NotificationIcon] Cleaning up socket connection');
       socket.disconnect();
     };
   }, [user, navigate]);
@@ -157,6 +154,10 @@ const NotificationIcon = () => {
 
   const getNotificationIcon = (type) => {
     switch (type) {
+      case 'order_placed':
+        return '📦';
+      case 'order_status_update':
+        return '🔄';
       case 'order_accepted':
         return '✅';
       case 'order_on_way':
@@ -172,6 +173,10 @@ const NotificationIcon = () => {
 
   const getNotificationColor = (type) => {
     switch (type) {
+      case 'order_placed':
+        return 'text-blue-600';
+      case 'order_status_update':
+        return 'text-green-600';
       case 'order_accepted':
         return 'text-green-600';
       case 'order_on_way':
