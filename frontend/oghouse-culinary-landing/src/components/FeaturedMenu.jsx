@@ -272,7 +272,7 @@ const FeaturedMenu = () => {
             size="lg" 
             variant="outline"
             className="rounded-full px-8 py-3 text-lg hover:bg-primary hover:text-primary-foreground transition-all duration-300"
-            onClick={() => window.location.href = '/menu'}
+            onClick={() => navigate('/menu')}
           >
             View Full Menu
           </Button>

@@ -1,16 +1,17 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Clock, Truck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 const Hero = () => {
   const { isAuthenticated, openAuthDialog } = useAuth();
+  const navigate = useNavigate();
 
   const handleOrderNow = () => {
     if (!isAuthenticated) {
       openAuthDialog('login');
     } else {
-      window.location.href = '/menu';
+      navigate('/menu');
     }
   };
 

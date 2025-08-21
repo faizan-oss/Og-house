@@ -35,7 +35,8 @@ api.interceptors.response.use(
         !error.config?.url?.includes('/auth/register')) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/';
+      // Don't use window.location.href here as it can cause routing issues
+      // The component should handle navigation if needed
     }
     return Promise.reject(error);
   }
