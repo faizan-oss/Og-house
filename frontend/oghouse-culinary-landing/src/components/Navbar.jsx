@@ -42,8 +42,13 @@ const Navbar = () => {
   // Click outside to close search results
   useEffect(() => {
     const handleClickOutside = (event) => {
+      // Don't close if clicking on search results or search input
       if (searchRef.current && !searchRef.current.contains(event.target)) {
-        setShowSearchResults(false);
+        // Additional check: don't close if clicking on search result items
+        const isClickingOnSearchResult = event.target.closest('[data-search-result]');
+        if (!isClickingOnSearchResult) {
+          setShowSearchResults(false);
+        }
       }
     };
 
@@ -101,8 +106,11 @@ const Navbar = () => {
         });
       }
       
-      setSearchResults(foods.slice(0, 5)); // Limit to 5 results
-      setShowSearchResults(foods.length > 0);
+      // Ensure each food item has a valid _id
+      const validFoods = foods.filter(food => food._id);
+      
+      setSearchResults(validFoods.slice(0, 5)); // Limit to 5 results
+      setShowSearchResults(validFoods.length > 0);
     } catch (error) {
       console.error('Search error:', error);
       setSearchResults([]);
@@ -113,6 +121,10 @@ const Navbar = () => {
   };
 
   const handleSearchResultClick = (foodId) => {
+    if (!foodId) {
+      return;
+    }
+    
     setSearchQuery("");
     setShowSearchResults(false);
     navigate(`/food/${foodId}`);
@@ -182,43 +194,47 @@ const Navbar = () => {
                 </Button>
               )}
               
-              {/* Search Results Dropdown */}
-              {showSearchResults && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-background border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
-                  {isSearching ? (
-                    <div className="p-4 text-center text-muted-foreground">
-                      Searching...
-                    </div>
-                  ) : (
-                    <>
-                      {searchResults.map((food) => (
-                        <div
-                          key={food._id}
-                          onClick={() => handleSearchResultClick(food._id)}
-                          className="p-3 hover:bg-muted cursor-pointer border-b border-border last:border-b-0 transition-colors"
-                        >
-                          <div className="flex items-center space-x-3">
-                            <img
-                              src={food.image}
-                              alt={food.name}
-                              className="w-12 h-12 object-cover rounded-lg"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-medium text-foreground truncate">{food.name}</h4>
-                              <p className="text-sm text-muted-foreground truncate">{food.description}</p>
-                              <div className="flex items-center justify-between mt-1">
-                                <span className="text-sm font-semibold text-primary">₹{food.price}</span>
-                                <Badge 
-                                  variant={(food.mainCategory || food.category) === 'veg' ? 'secondary' : 'destructive'}
-                                  className="text-xs"
-                                >
-                                  {(food.mainCategory || food.category) === 'veg' ? 'Veg' : 'Non-Veg'}
-                                </Badge>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                             {/* Search Results Dropdown */}
+                               {showSearchResults && (
+                  <div 
+                    className="absolute top-full left-0 right-0 mt-2 bg-background border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto"
+                    data-search-result="true"
+                  >
+                   {isSearching ? (
+                     <div className="p-4 text-center text-muted-foreground">
+                       Searching...
+                     </div>
+                   ) : (
+                                         <>
+                       {searchResults.map((food) => (
+                         <div
+                           key={food._id}
+                           data-search-result="true"
+                           onClick={() => handleSearchResultClick(food._id)}
+                           className="p-3 hover:bg-muted cursor-pointer border-b border-border last:border-b-0 transition-colors"
+                         >
+                           <div className="flex items-center space-x-3">
+                             <img
+                               src={food.image}
+                               alt={food.name}
+                               className="w-12 h-12 object-cover rounded-lg"
+                             />
+                             <div className="flex-1 min-w-0">
+                               <h4 className="font-medium text-foreground truncate">{food.name}</h4>
+                               <p className="text-sm text-muted-foreground truncate">{food.description}</p>
+                               <div className="flex items-center justify-between mt-1">
+                                 <span className="text-sm font-semibold text-primary">₹{food.price}</span>
+                                 <Badge 
+                                   variant={(food.mainCategory || food.category) === 'veg' ? 'secondary' : 'destructive'}
+                                   className="text-xs"
+                                 >
+                                   {(food.mainCategory || food.category) === 'veg' ? 'Veg' : 'Non-Veg'}
+                                 </Badge>
+                               </div>
+                             </div>
+                           </div>
+                         </div>
+                       ))}
                       {searchResults.length > 0 && (
                         <div className="p-2 border-t border-border">
                           <Button
@@ -232,6 +248,7 @@ const Navbar = () => {
                           >
                             View all results for "{searchQuery}"
                           </Button>
+                          
                         </div>
                       )}
                     </>
@@ -341,8 +358,11 @@ const Navbar = () => {
             />
             
             {/* Mobile Search Results */}
-            {showSearchResults && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-background border border-border rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
+                         {showSearchResults && (
+               <div 
+                 className="absolute top-full left-0 right-0 mt-2 bg-background border border-border rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto"
+                 data-search-result="true"
+               >
                 {isSearching ? (
                   <div className="p-4 text-center text-muted-foreground">
                     Searching...
@@ -350,11 +370,12 @@ const Navbar = () => {
                 ) : (
                   <>
                     {searchResults.map((food) => (
-                      <div
-                        key={food._id}
-                        onClick={() => handleSearchResultClick(food._id)}
-                        className="p-3 hover:bg-muted cursor-pointer border-b border-border last:border-b-0 transition-colors"
-                      >
+                                                                                           <div
+                          key={food._id}
+                          data-search-result="true"
+                          onClick={() => handleSearchResultClick(food._id)}
+                          className="p-3 hover:bg-muted cursor-pointer border-b border-border last:border-b-0 transition-colors"
+                        >
                         <div className="flex items-center space-x-3">
                           <img
                             src={food.image}
