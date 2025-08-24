@@ -148,12 +148,12 @@ const Navbar = () => {
             {isAuthenticated && (
               <span className="text-sm lg:text-base text-muted-foreground">
                 Welcome {user?.role === 'admin' ? (
-                  <span className="font-bold text-black bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 px-3 py-1 rounded-full text-sm shadow-lg border border-yellow-300">
+                  <span className="font-bold text-black bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 px-3 py-1 rounded-full text-sm shadow-lg border border-yellow-300 whitespace-nowrap">
                     👑 Chef Parivash!
                   </span>
                 ) : (
                   <span className="font-bold text-foreground">
-                    {user?.name}
+                    {user?.name ? user.name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ') : ''}
                   </span>
                 )}
               </span>
@@ -403,6 +403,22 @@ const Navbar = () => {
         {isMobileMenuOpen && (
           <div className="lg:hidden border-t border-border bg-background/95 backdrop-blur">
             <div className="py-4 space-y-3">
+              {/* User Welcome Message for Mobile */}
+              {isAuthenticated && (
+                <div className="px-4 py-3 border-b border-border">
+                  <p className="text-sm text-muted-foreground mb-2">Welcome</p>
+                  {user?.role === 'admin' ? (
+                    <div className="font-bold text-black bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 px-3 py-2 rounded-full text-sm shadow-lg border border-yellow-300 whitespace-nowrap">
+                      👑 Chef Parivash!
+                    </div>
+                  ) : (
+                    <div className="font-bold text-foreground">
+                      {user?.name ? user.name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ') : ''}
+                    </div>
+                  )}
+                </div>
+              )}
+              
               <Link 
                 to="/menu" 
                 className="block px-4 py-3 text-foreground hover:text-primary hover:bg-muted/50 rounded-lg transition-colors"

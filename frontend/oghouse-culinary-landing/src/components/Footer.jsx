@@ -63,12 +63,26 @@ const Footer = () => {
                crafted by our expert chefs.
              </p>
              <div className="flex justify-center sm:justify-start space-x-4">
-              <Button variant="ghost" size="sm" className="p-2 hover:bg-background/10 text-background">
-                <Instagram className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="sm" className="p-2 hover:bg-background/10 text-background">
-                <Facebook className="h-5 w-5" />
-              </Button>
+              <a 
+                href="https://www.instagram.com/the.og.house/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-block"
+              >
+                <Button variant="ghost" size="sm" className="p-2 hover:bg-background/10 text-background transition-all duration-300 hover:scale-110">
+                  <Instagram className="h-5 w-5" />
+                </Button>
+              </a>
+              <a 
+                href="https://www.facebook.com/share/1AKUGeHyMJ/?mibextid=wwXIfr" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-block"
+              >
+                <Button variant="ghost" size="sm" className="p-2 hover:bg-background/10 text-background transition-all duration-300 hover:scale-110">
+                  <Facebook className="h-5 w-5" />
+                </Button>
+              </a>
               <Button variant="ghost" size="sm" className="p-2 hover:bg-background/10 text-background">
                 <Twitter className="h-5 w-5" />
               </Button>

@@ -27,9 +27,14 @@ exports.register = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // Format name with proper capitalization
+    const formattedName = name.split(' ').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    ).join(' ');
+
     // Create user
     const user = new User({
-      name,
+      name: formattedName,
       email,
       password: hashedPassword,
       role
@@ -77,6 +82,16 @@ exports.login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    // Update user name to proper capitalization if needed
+    if (user.name && user.name !== user.name.split(' ').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    ).join(' ')) {
+      user.name = user.name.split(' ').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+      ).join(' ');
+      await user.save();
     }
 
     // Generate token
