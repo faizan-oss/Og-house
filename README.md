@@ -1,69 +1,41 @@
-OG House - Culinary Food Ordering Platform
+<h3>🔹 OG House - Culinary Food Ordering Platform</h3>
+<img src="https://github.com/user-attachments/assets/e34dcdef-4458-4004-b6ca-e50c5f1c2749" alt="OG House Screenshot" width="100%" />
+
+<p>
 A complete food ordering platform built with modern web technologies, featuring a responsive frontend and robust backend API.
-✨ Features
-🍽️ Food Ordering System - Complete menu management and order processing
-��‍💼 Admin Dashboard - Intuitive interface for managing menus, orders, and business metrics
-📧 Email Notifications - Automated order updates and customer communications
-💳 Payment Integration - Secure payment processing with Razorpay
-📱 Responsive Design - Works perfectly on all devices
-🚀 Real-time Updates - Live order tracking and status updates
-🛠️ Tech Stack
-Frontend
-React.js - Modern UI framework
-Tailwind CSS - Utility-first CSS framework
-shadcn/ui - Beautiful, accessible components
-Vite - Fast build tool
-Backend
-Node.js - Server runtime
-Express.js - Web framework
-MongoDB - Database
-JWT - Authentication
-Services
-Cloudinary - Image uploads and management
-Razorpay - Payment gateway
-Email Service - Automated notifications
-Vercel - Frontend deployment
-🚀 Getting Started
-Prerequisites
-Node.js (v16 or higher)
-MongoDB
-Cloudinary account
-Razorpay account
-Installation
-git clone https://github.com/yourusername/og-house.git
-cd og-house
-Clone the repository
-Install dependencies
-# Backend
-cd backend
-npm install
+</p>
 
-# Frontend
-cd ../frontend/oghouse-culinary-landing
-npm install
-Environment Setup
-# Backend - Create .env file
-cp env.template .env
-# Fill in your environment variables
+<ul>
+  <li>🍽️ <strong>Food Ordering System</strong> - Complete menu management and order processing</li>
+  <li>👨‍💼 <strong>Admin Dashboard</strong> - Intuitive interface for managing menus, orders, and business metrics</li>
+  <li>📧 <strong>Email Notifications</strong> - Automated order updates and customer communications</li>
+  <li>💳 <strong>Payment Integration</strong> - Secure payment processing with Razorpay</li>
+  <li>📱 <strong>Responsive Design</strong> - Works perfectly on all devices</li>
+  <li>🚀 <strong>Real-time Updates</strong> - Live order tracking and status updates</li>
+</ul>
 
-# Frontend - Update API endpoints in src/lib/api.js
-Run the application
-# Backend
-cd backend
-npm run dev
+<h4>🛠️ Tech Stack</h4>
+<ul>
+  <li><strong>Frontend:</strong> React.js, Tailwind CSS, shadcn/ui, Vite</li>
+  <li><strong>Backend:</strong> Node.js, Express.js, MongoDB, JWT</li>
+  <li><strong>Services:</strong> Cloudinary (Image Uploads), Razorpay (Payments), Email Service (Notifications), Vercel (Frontend Deployment)</li>
+</ul>
 
-# Frontend
-cd ../frontend/oghouse-culinary-landing
-npm run dev
-📁 Project Structure
+<p><strong>Tags:</strong> 
+  #ReactJS #NodeJS #Express #MongoDB #JWT #Razorpay #Cloudinary #Fullstack #Vercel
+</p>
+
+<h4>📂 Project Structure</h4>
+
+<pre>
 og-house/
 ├── backend/                 # Node.js API server
 │   ├── controllers/        # Route controllers
-│   ├── models/            # Database models
-│   ├── routes/            # API routes
-│   ├── middleware/        # Custom middleware
-│   └── services/          # Business logic services
-├── frontend/              # React.js application
+│   ├── models/             # Database models
+│   ├── routes/             # API routes
+│   ├── middleware/         # Custom middleware
+│   └── services/           # Business logic services
+├── frontend/               # React.js application
 │   └── oghouse-culinary-landing/
 │       ├── src/
 │       │   ├── components/ # React components
@@ -72,11 +44,10 @@ og-house/
 │       │   └── lib/        # Utilities and API
 │       └── public/         # Static assets
 └── README.md
-🔧 Development
-This project was built using modern development practices and tools, enabling rapid prototyping and MVP development.
-�� Screenshots
-<img width="800" height="383" alt="image" src="https://github.com/user-attachments/assets/e34dcdef-4458-4004-b6ca-e50c5f1c2749" />
+</pre>
 
-📄 License
-This project is proprietary software. All rights reserved.
-Built with modern web technologies
+<p><strong>🔗 Links:</strong></p>
+<ul>
+  <li><a href="https://github.com/faizan-oss/Og-house" target="_blank">View Project</a></li>
+  <li><a href="https://og-house-bay.vercel.app/" target="_blank">Live Site</a></li>
+</ul>
